@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dmitri Kourliandski — Thoughts & Quotes</title>
+<meta name="description" content="Thoughts & Quotes by Dmitri Kourliandski">
+<style>
+:root {
+  --bg:#f2eee6;
+  --ink:#11110f;
+  --soft:#cfc8bc;
+  --muted:#777066;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-snap-type:y proximity;scroll-padding-top:var(--sitebar-h)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif;overflow-x:hidden}
+.panel{
+  min-height:calc(100svh - var(--sitebar-h));
+  scroll-snap-align:start;
+  scroll-snap-stop:normal;
+  position:relative;
+  border-bottom:1px solid rgba(0,0,0,.14);
+}
+.cover{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:5vw;
+}
+.cover-grid{
+  width:min(1180px,100%);
+  display:grid;
+  grid-template-columns:1fr auto;
+  grid-template-rows:auto 1fr auto;
+  align-items:end;
+  min-height:74vh;
+}
+.cover-small{
+  grid-column:1/2;
+  grid-row:1;
+  font-size:11px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.cover-title{
+  grid-column:1/3;
+  grid-row:2;
+  align-self:center;
+  font-size:clamp(76px,14vw,190px);
+  line-height:.76;
+  font-weight:700;
+  letter-spacing:-.085em;
+}
+.cover-title span{
+  display:inline-block;
+  margin-left:10vw;
+  font-weight:400;
+}
+.cover-years{
+  grid-column:2;
+  grid-row:3;
+  font-size:12px;
+  letter-spacing:.18em;
+  color:var(--muted);
+}
+.scroll-cue{
+  position:absolute;
+  left:5vw;
+  bottom:28px;
+  font-size:11px;
+  letter-spacing:.12em;
+  color:var(--muted);
+}
+.text-panel{
+  display:grid;
+  grid-template-columns:minmax(86px,12vw) minmax(0,1fr);
+  align-items:center;
+  padding:7vh 5vw;
+  overflow:visible;
+}
+.rail{
+  height:76vh;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  position:relative;
+  z-index:2;
+}
+.rail-label{
+  font-size:12px;
+  letter-spacing:.15em;
+  color:var(--muted);
+  min-width:48px;
+}
+.rail-line{
+  width:1px;
+  background:rgba(0,0,0,.2);
+  flex:1;
+  margin:18px 0 0 4px;
+}
+.ghost-number{
+  position:absolute;
+  right:-.04em;
+  bottom:-.18em;
+  font-size:clamp(180px,38vw,570px);
+  line-height:.75;
+  font-weight:700;
+  letter-spacing:-.08em;
+  color:rgba(0,0,0,.035);
+  pointer-events:none;
+  user-select:none;
+}
+.text-wrap{
+  width:min(890px,92%);
+  position:relative;
+  z-index:2;
+}
+.text-wrap p{
+  margin:0 0 1em;
+  font-size:clamp(21px,2.25vw,34px);
+  line-height:1.44;
+  letter-spacing:-.018em;
+}
+.text-wrap p:last-child{margin-bottom:0}
+/* make shorter aphoristic slides more monumental */
+.text-panel.short .text-wrap p{font-size:clamp(30px,4vw,60px);line-height:1.2}
+.topbar{
+  position:fixed;
+  top:var(--sitebar-h);left:0;right:0;
+  z-index:20;
+  height:3px;
+  background:rgba(0,0,0,.08);
+}
+.progress{
+  height:100%;
+  width:0%;
+  background:var(--ink);
+  transition:width .2s ease-out;
+}
+.counter{
+  position:fixed;
+  right:20px;
+  top:calc(var(--sitebar-h) + 18px);
+  z-index:20;
+  font-size:11px;
+  letter-spacing:.12em;
+  color:var(--muted);
+  background:rgba(242,238,230,.72);
+  backdrop-filter:blur(8px);
+  padding:7px 9px;
+}
+.nav{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  z-index:20;
+  display:flex;
+  gap:6px;
+}
+.nav button{
+  width:39px;height:39px;
+  border:1px solid rgba(0,0,0,.18);
+  background:rgba(242,238,230,.82);
+  backdrop-filter:blur(8px);
+  cursor:pointer;
+  font-size:16px;
+}
+@media(max-width:720px){
+  .cover{padding:24px}
+  .cover-grid{min-height:80vh}
+  .cover-title{font-size:66px;line-height:.82}
+  .cover-title span{margin-left:0}
+  .text-panel{grid-template-columns:38px 1fr;padding:7vh 20px 11vh 16px;align-items:center}
+  .rail{height:78vh}
+  .text-wrap{width:100%}
+  .text-wrap p{font-size:clamp(17px,4.5vw,19px);line-height:1.5}
+  .ghost-number{font-size:52vw;bottom:-.08em}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .progress{transition:none}
+}
+</style>
+
+<style id="global-site-nav-css">
+:root{--sitebar-h:46px}
+.global-site-nav{
+  position:sticky;
+  top:0;
+  z-index:10000;
+  height:var(--sitebar-h);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  padding:0 4vw;
+  border-bottom:1px solid rgba(0,0,0,.13);
+  background:rgba(242,238,230,.96);
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:11px;
+  line-height:1;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+}
+.global-site-nav a{
+  color:inherit!important;
+  text-decoration:none!important;
+  font-size:11px!important;
+  white-space:nowrap;
+}
+.global-site-nav a:hover{opacity:.55}
+.global-site-nav .nav-right{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  min-width:0;
+}
+@media(max-width:760px){
+  :root{--sitebar-h:44px}
+  .global-site-nav{padding:0 16px;gap:12px}
+  .global-site-nav .nav-right{gap:11px}
+  .global-site-nav .nav-right a:nth-child(3),
+  .global-site-nav .nav-right a:nth-child(4){display:none}
+}
+</style>
+
+</head>
+<body>
+
+<nav class="global-site-nav" aria-label="Site navigation">
+  <a href="index.html">Dmitri Kourliandski</a>
+  <div class="nav-right">
+    <a href="works.html">works</a>
+    <a href="releases.html">releases</a>
+    <a href="bibliography.html">bibliography</a>
+    <a href="thoughts.html">thoughts</a>
+    <a href="https://www.kourliandski.com/radio-espaces-bruts" target="_blank" rel="noopener">radio</a>
+  </div>
+</nav>
+
+<div class="topbar"><div class="progress" id="progress"></div></div>
+<div class="counter"><span id="count">0</span> / 41</div>
+
+
+<section class="cover panel" id="s0">
+  <div class="cover-grid">
+    <div class="cover-small">Dmitri Kourliandski</div>
+    <div class="cover-title">thoughts<br><span>&amp; quotes</span></div>
+    <div class="cover-years">2002—2026</div>
+  </div>
+  <div class="scroll-cue">scroll ↓</div>
+</section>
+
+
+<section class="panel text-panel" id="s1" data-index="1" data-label="00">
+  <div class="ghost-number">00</div>
+  <div class="rail">
+    <div class="rail-label">00</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>this collection brings together some thoughts and statements i have formulated over the past 25 years in interviews, lectures, and articles. revisiting them today, i have selected those that still feel relevant to me. i have chosen not to include dates, as i stand by these texts from the perspective of the present moment - they reflect what i am ready to sign my name to today. these statements do not claim to be ultimate truths. many of them remain, for me, provocations - starting points for reflection, debate, acceptance, or resistance. the illustrations, created using the midjourney neural network, follow free associations that are, to varying degrees, connected - or disconnected - from the corresponding texts.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s2" data-index="2" data-label="Intro">
+  <div class="ghost-number">Intro</div>
+  <div class="rail">
+    <div class="rail-label">Intro</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>music is a ritual of silence in which we experience the death of language over and over again. in music, meaning is not guaranteed by a name, a notion, or a narrative. music does not inform - it leaves us alone with what cannot be named. this is precisely why culture insists on filling music with language: plot, image, emotion.</p>
+<p>culture seeks to conserve the world, to hold it within a system of signs, explanations, and interpretations. in this way, it mummifies the fear of death, transforming it into an archive of symbols, rituals, monuments, myths, and their derivatives. culture becomes both a practice of rejecting death and, at the same time, its triumph.</p>
+<p>music can offer an experience of liberation from this conditioning by the fear of death. but for this to happen, music must free itself from the attributes imposed by culture - genre, model, style - everything that simulates and stimulates the recognizability and repeatability of experience. “absolute music” exists where experience and memory do not function.</p>
+<p>but culture is also an economy based on the recognition and repeatability of experience. the economy of culture resists the absolutization of musical experience; it displaces and marginalizes it. the ideal economic model that could support “absolute creativity” (which seeks to free itself from the constraints of expectations and fears) is one that offers a “pig in a poke.” this is a no-win lottery model, in which misunderstanding, dissatisfaction, and disappointment are no less desirable aesthetic experiences than admiration.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s3" data-index="3" data-label="01">
+  <div class="ghost-number">01</div>
+  <div class="rail">
+    <div class="rail-label">01</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>starting a new piece. or rather, starting the search for it. it already exists - i &quot;only&quot; need to uncover its shape. to do this, i need to understand what graphic expression it might have*. in other words, i am composing notation. notation is a medium, and &quot;the medium is the message&quot;. the notation composes the music.</p>
+<p>* - expression doesn&#x27;t necessarily have to be graphically represented this is about a specific work in which this is the case. obviously, scores can be textual, object-based, sound-based, light-based, movement-based - or not be at all.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s4" data-index="4" data-label="02">
+  <div class="ghost-number">02</div>
+  <div class="rail">
+    <div class="rail-label">02</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>after a year of silence, i felt as if i had lost the reason to compose. the questions &quot;what to compose&quot; and &quot;how to compose&quot; were completely replaced by the question &quot;why compose&quot; (in fact, the answer to the first two questions lies here). the point, obviously, is not to find the answer (which does not exist), but to keep questioning. i knew this before, but had never encountered such a clear manifestation of the existential nature of composing. the line between composing and living is blurry. they&#x27;re both about the choices we make - and most of the time, not only for ourselves. and here i am again - with no idea not so much about what a new composition might be like, but about what a &quot;composition&quot; is as such. both as a process and as a result. all over again, composing music is composing what music is. and responsibilitie is the tool.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s5" data-index="5" data-label="03">
+  <div class="ghost-number">03</div>
+  <div class="rail">
+    <div class="rail-label">03</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>music is a convenient tool for ideological manipulation: it seems abstract (it dissolves any statement embedded in it into abstraction), it is about nothing, or rather, about itself and (sic!) its possibility. look, listen - i am possible! an ideal machine of illusions, leading away from its source into metaphor. illusions, because, pretending to be abstract, it sings very concrete hymns to that which ensures its possibility.</p>
+<p>&quot;to renounce illusions about a certain position means to renounce the position that needs illusions.&quot; (Karl Marx) music is not a crystal castle in the clouds, beyond it lie real life, economics, religions, politics, ideologies, aesthetics, competition - music is an institution. authors, building their castles, inhabit this institution - ignoring it, resisting it, enjoying it, submitting to it. being a condition of music, it becomes the very material of music.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s6" data-index="6" data-label="04">
+  <div class="ghost-number">04</div>
+  <div class="rail">
+    <div class="rail-label">04</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>i am somewhat doubtful and wary of music that is easy to like, that wants to be liked (yes, i know it&#x27;s very personal, but that&#x27;s exactly the point). i&#x27;m capable to admire it, but i feel much more involved when music requires me to struggle through it. or, when music is something i have yet to guess, to fulfill. when music demands from me no less - and rather more - than it seems to be capable to give. a task with an error. i find it difficult to admire strength and brilliance - i empathize more with unconfidence and fragility. i can&#x27;t give examples, because this is a very subjective and ephemeral feeling. these properties do not depend on aesthetics or style - they can be found in old music, or new music, experimental music, or pop-music. it is no less a mirage of perception than a product of music. but not all music inspires mirages.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s7" data-index="7" data-label="05">
+  <div class="ghost-number">05</div>
+  <div class="rail">
+    <div class="rail-label">05</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>composing music is not about putting symbols on paper, but rather clearing away the unnecessary. the choice of what to be and what not to be is, in part, an ethical choice. thus, music is not only about what is there, but also, to no lesser extent, about what is not there. on a sheet of paper, in an infinite number of layers, is recorded not only all existing music, not only all music that is yet to be born, but, most strikingly, all music that will never be born is also contained there in an unmanifested presence (of course, &quot;a sheet of paper&quot; is metaphorical here - it could be any medium.) creativity is when, despite the diversity of choice, we select what is lacking. in a way, it is a dialogue with the absent, a task with an unknown. similarly, a work of art is never here, not in the material, not in the present - it is always somewhere else, a guess and a doubt about itself.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s8" data-index="8" data-label="06">
+  <div class="ghost-number">06</div>
+  <div class="rail">
+    <div class="rail-label">06</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>the political in music is not embedded in slogans or documentariness but in its structure and organization - in what is commonly considered abstraction. musical systems are models of socio-political mechanisms that govern communities of sounds (and beyond sounds - of musicians and audiences). composers eustablish hierarchies, systems of subordinations, minorities and majorities. these systems encode perception by transmitting a certain strategies of relations with music (in a open social-historical perspective), in music (as a closed network of decisions and choices), and with a concert as a social ritual which frames perception by its procedures (or sometimes limits it to them). music turns to be a manifestation of a certain system of relations and values, music turns to be ideology, politics. however, paradoxically, direct political topics within concert music (and institutional art in general) are most often (if not always) devalued. in art, blood, death, deception, vice, and love are not real. similarly, political statements are simulacra. art turns activists into artists, society into an audience, ethical into aesthetic. by directly addressing the political agenda, art neutralizes it.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s9" data-index="9" data-label="07">
+  <div class="ghost-number">07</div>
+  <div class="rail">
+    <div class="rail-label">07</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>i am working on a new composition for ensemble.</p>
+<p>i am? working on? a new? composition? for ensemble?</p>
+<p>composing answers to these questions (or, more precisely, asking these questions) is what composition is all about.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s10" data-index="10" data-label="08">
+  <div class="ghost-number">08</div>
+  <div class="rail">
+    <div class="rail-label">08</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>sound is a perceptual event that unfolds over time, revealing its acoustic properties and internal structure. sound is a condition of music; even silence in music is silent about sound. form (as a completed process or open environment, situation) is realized through the experience of sound and the relationships between sounds over time. however, a musical work is not limited to sound. sound is a surface, like window glass - if we focus on it, we can admire its texture and properties, ceasing to see what is behind it, our own reflection in it, and how our reflection overlaps with the landscape. to notice this, we need to abstract ourselves from the surface of the glass. but sound does everything it can to draw all the attention to itself. sound is fetishized, sound is overrated. sound prevents us from hearing. lachenmann&#x27;s formula, said about musical culture, like a walkman that lets us listen and at the same time plugs our ears, is also applicable to sound itself. sound is a surface that must be overcome. will the landscape disappear if the glass is broken? will we become part of the landscape when we lose our reflection? music is not material, but what happens (and does not happen) with it, what happens to us in it.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s11" data-index="11" data-label="09">
+  <div class="ghost-number">09</div>
+  <div class="rail">
+    <div class="rail-label">09</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>perception (re)codes &quot;reality&quot;. the same event, phenomenon, or work of art is seen differently by each person. more than that: the very same person, from different moments and circumstances of life, may see the same event, phenomenon, or work of art differently. art (and perhaps music in particular) exposes and thematizes this difference. the impossibility of direct communication (without distortions) is one of art’s most important messages. by reconciling us with this impossibility, art reconciles us with the misunderstanding and misreading that saturates the world. art is a dialogue with the unknown and it is precisely through this unknown that art becomes an existential experience rather than an abstract aesthetic one.</p>
+<p>people communicate like bats: we send out our solitary signal into the unknown and judge the world by the distortions with which that signal returns. sometimes these distortions overturn our understanding of ourselves. sometimes they destroy our lives. however sometimes they save, support, and restore.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s12" data-index="12" data-label="10">
+  <div class="ghost-number">10</div>
+  <div class="rail">
+    <div class="rail-label">10</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>creativity is the presentation of another: a text, an object, an event. perception is the experience of encountering another, of comprehending it, of discovering it within oneself. to accept another means to change oneself, to become other. the fear of accepting another is the fear of changing, of not remaining the same. the other is an enemy - it has come to make me other, to become another me. at the same time, not opening the door to the other means preserving the hope that there is another behind it - the hope of not being alone. the fear of the other turns out to be the fear of loneliness, the fear of oneself.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s13" data-index="13" data-label="11">
+  <div class="ghost-number">11</div>
+  <div class="rail">
+    <div class="rail-label">11</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>Mozart is genius not where he reproduces the norms of the genre, but where he overcomes them. by repeating an existing model, the author becomes its avatar, through which the model reproduces and multiplies itself, replacing the author. the listener may insist on a purely emotional rather than intellectual perception of music. but most often, emotion is associated with recognition or non-recognition, the ability to relate one&#x27;s own experience to what is heard. it is here that the listener makes a choice in favor of confirming or questioning the experience. art is able (if not meant) to divide us, to expose our differences, so that we can learn to accept and hear otherness. but people tend to seek confirmation of themselves.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s14" data-index="14" data-label="12">
+  <div class="ghost-number">12</div>
+  <div class="rail">
+    <div class="rail-label">12</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>perception is the art of experiencing what is not on the surface. the art of hearing beyond sounds, beyond words, seeing beyond images. in chinese painting, there is a concept called liu&#x27; ba&#x27;i - intentional omission - the artists leave areas of the canvas unpainted, allowing us to only guess what might be depicted there. usually, it is nature - the sky, the sea. one of the reasons for this incompleteness is the indescriptibility of nature&#x27;s beauty. these omissions express the inexpressible. art teaches us this. first in its overcoming of illustrativeness - and then in its striving to overcome form.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s15" data-index="15" data-label="13">
+  <div class="ghost-number">13</div>
+  <div class="rail">
+    <div class="rail-label">13</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>Marx wrote: &quot;a work of art forms an audience capable to perceive it.&quot; i am looking for music that requires me to reassemble myself when i don&#x27;t understand what i&#x27;m dealing with and don&#x27;t know how to react. music is realized in perception. the listener is the point of assembly (and constant reassembly) of music. composers compose listeners who are capable of listening to their music; the listener is the final material of music. but more often, the listener composes composers who confirm their expectations and demands. the more confirmation the listener finds, the less they are willing to accept others. when the demand for others disappears, dictatorships arise.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s16" data-index="16" data-label="14">
+  <div class="ghost-number">14</div>
+  <div class="rail">
+    <div class="rail-label">14</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>the idea of &quot;objective music,&quot; which i began to formulate in 2004, still sounds relevant to me, despite the fact that over the years i have radically changed the material and the principle of its structuring from strictly fixed, mechanistic scores to open performances. what has remained constant is the motivational basis: i don&#x27;t compose music, i find it (as tom johnson used to say, but this can also be attributed to alvin lucier and many others). if earlier i was talking about kinetic sound sculptures, later i turned to situations and environments in which listener/performer/author make their choice, realizing through it their own experience of presence (in contrast to following the metamorphoses of material, subordinated to the author&#x27;s dramaturgy). in other words, the position of the listener/performer/author towards the object has shifted - outside versus inside the object, where the object becomes a space of active choice rather than observation.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s17" data-index="17" data-label="15">
+  <div class="ghost-number">15</div>
+  <div class="rail">
+    <div class="rail-label">15</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>i seek music that requires effort to listen to. i seek music that is hard to enjoy. it tells me much more about myself than the music that delights and captivates. i am both what i am and what i am not. music is a way for me to explore the latter.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s18" data-index="18" data-label="16">
+  <div class="ghost-number">16</div>
+  <div class="rail">
+    <div class="rail-label">16</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>form is a keyhole through which we can observe a fragment of content. forms are infinitely diverse - the content is always the same - the only one available to us: ourselves, both what we are and are not *. a work of art is an act of forcibly endowing content with form. forcibly - because content does not need form, content exists both before and outside of form. ultimately, the form of a work is precisely a way of pointing to what lies outside it. the more difficult it is to follow form, the more difficult the act of perception becomes, the closer we are to content, i.e., to the inexpressible and the unrecognizable.</p>
+<p>* - to be more precise, we are a transition from what we are no longer to what we are not yet.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s19" data-index="19" data-label="17">
+  <div class="ghost-number">17</div>
+  <div class="rail">
+    <div class="rail-label">17</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>the territory of the incomprehensible is marginalized, it is pushed out of the culture of the accepted, endowed with negative connotations. the incomprehensible brings danger, threat, deception. the incomprehensible becomes an object and material for mockery or creepery. humanity cultivates the joy of recognition. but growth is only possible through the unknown. misunderstanding is a sign of trust. non-recognition is the ability to see the other.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s20" data-index="20" data-label="18">
+  <div class="ghost-number">18</div>
+  <div class="rail">
+    <div class="rail-label">18</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>when beethoven asks in his last quartet, “muss es sein?” - he is essentially echoing shakespeare’s “to be or not to be.” beethoven answers, “es muss sein!” - ”to be.” but the point isn’t in the answer - the point is in the doubt that he introduces.</p>
+<p>art is the practice of revealing connections between things. there is art that reveals obvious connections - these easily become goods, tools of manipulation and propaganda. and there is art that establishes connections that are not obvious; this is the art of doubt. by introducing doubt into the fabric of the world, art hinders the functioning of machines of manipulation. that is why dictatorships turn to the obvious, produce answers and suppress the doubts.</p>
+<p>john cage was born in beethoven’s question, while the answer brought a completely different figure.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s21" data-index="21" data-label="19">
+  <div class="ghost-number">19</div>
+  <div class="rail">
+    <div class="rail-label">19</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>musicians often have empathic listening. pianists hear with their fingers, string players with positions, wind players and vocalists with their breath. i had been preparing to become a flutist since childhood, but at age 20, due to an injury, i had to give up and look for another profession. then i started composing music. but sound remained for me linked to trauma, to pain, to impossibility. sound as overcoming, time as a challenge. this shaped my musical language for a long time.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s22" data-index="22" data-label="20">
+  <div class="ghost-number">20</div>
+  <div class="rail">
+    <div class="rail-label">20</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>i can&#x27;t know anything about my listener. i don&#x27;t even know everything about myself. therefore, &quot;writing for the listener&quot; means writing for the listener as you imagine them - that is, inventing them. so why not invent a listener who knows and understands more than you do, who is ready for the most radical experience? only by addressing such a listener could beethoven and feldman, webern and ustvolskaya emerge. being uncompromising means respecting the listener.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s23" data-index="23" data-label="21">
+  <div class="ghost-number">21</div>
+  <div class="rail">
+    <div class="rail-label">21</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>staying in the linear sound paradigm, we expect one event to be followed by another; we wait to experience sound twists and developments, drama, or melodrama. if another event doesn’t follow, we yawn and become frustrated. however, if we change our listening angle, directing it into the sound (or into the sonic situation) - we can begin to distinguish, layer by layer, detail by detail, how the space of sound is structured. we become sound tourists exploring new territories and objects. it is precisely this shift in the paradigm of listening attention that often becomes a problem for the perception of contemporary music. waiting for action instead of stepping inside.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s24" data-index="24" data-label="22">
+  <div class="ghost-number">22</div>
+  <div class="rail">
+    <div class="rail-label">22</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>staying in the linear sound paradigm, we expect one event to be followed by another; we wait to experience sound twists and developments, drama, or melodrama. if another event doesn’t follow, we yawn and become frustrated. however, if we change our listening angle, directing it into the sound (or into the sonic situation) - we can begin to distinguish, layer by layer, detail by detail, how the space of sound is structured. we become sound tourists exploring new territories and objects. it is precisely this shift in the paradigm of listening attention that often becomes a problem for the perception of contemporary music. waiting for action instead of breaking the sound surface and stepping inside.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s25" data-index="25" data-label="23">
+  <div class="ghost-number">23</div>
+  <div class="rail">
+    <div class="rail-label">23</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>when i decide to write down the “first note” - by that very act, i take responsibility for it. notes, like children, do not ask to be born; birth is an act of life-giving violence upon which life itself rests. the trauma of birth, which we face throughout our lives - both as children and as parents. by deciding to write down the “second note,” i shift the focus from one phenomenon to the relationships between phenomena; i begin to exercise authority. creativity is a machine of responsibility, guilt, and care. while pleasure and excitement are the main seducers. if you can avoid composing - it’s better not to.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s26" data-index="26" data-label="24">
+  <div class="ghost-number">24</div>
+  <div class="rail">
+    <div class="rail-label">24</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>music in recent decades has rarely sought to find a radical statement within itself - that is, about itself and through itself (by “radical,” i mean the degree to which it defies expectations - those of listeners, institutions, and the profession). often, radicalism is replaced by a move beyond the boundaries of the medium. that is, not expanding the boundaries - but stepping outside them. at the same time, the “intramusical” (i.e., limited to sound (even in its absence) within the space and time of the concert ritual) often remains within traditional models of the author/text/instrument/interpretation/listener relationship.</p>
+<p>paradoxically, stepping beyond the medium’s boundaries turned out to be the guarantor of the inviolability of the territory of “pure music”; thanks to this step, it became even more institutionalized, preserved. but if a radical gesture is to be expected in music, it is possible only within its framework. everything else (without diminishing its artistic value) is a substitution, a trick, a compromise.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s27" data-index="27" data-label="25">
+  <div class="ghost-number">25</div>
+  <div class="rail">
+    <div class="rail-label">25</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>we now observe how modern regimes of truth collapse into a mere sum of names on gravestones, revealing individuals in their defenselessness and weakness before the depersonalizing mechanisms of dogmatism (which assumes the existence of a universal truth and demands service to it), heroism (which introduces the idea of an enemy as its very condition), and ironic distancing into an impersonal archive.</p>
+<p>the world stands on unsolvable and unavoidable misreadings, mishearings, and misinterpretations where meaning is never transmitted - it is born, again and again, within each individual. doubt, weakness, defenselessness, and fragility have long been marginalized and suppressed by institutions of truth. only their acceptance might offer a way out.</p>
+<p>and why music? music is the mooing of truth.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s28" data-index="28" data-label="26">
+  <div class="ghost-number">26</div>
+  <div class="rail">
+    <div class="rail-label">26</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>proportions and smoothness of form, instrumental virtuosity, timbral inventiveness, balanced orchestration - all of this becomes the subject of comparative analysis, giving a sense of control over the material and, through that control, offering satisfaction.</p>
+<p>but the perfection of craftsmanship and form easily turns into convention, and convention into a way of avoiding uncomfortable questions. the more sophisticated the technique, the easier it is to accept the message without criticism. (the message here is the communication of the system of relationships within the material, from a historical perspective and in relation to the conventions of concert ritual.)</p>
+<p>craft is a shield that protects the artist from vulnerability and the audience from the need to doubt. it seems that today, radicalism lies not in the perfection of form, but in the rejection of its excessive persuasiveness, in endowing art with the capacity to doubt.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s29" data-index="29" data-label="27">
+  <div class="ghost-number">27</div>
+  <div class="rail">
+    <div class="rail-label">27</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>no one could do my work better (or worse) than me, because no one but me would do it. composition means not “seeing a goal and moving toward it,” but attracting potential “goals” you hadn’t even imagined before, learning to discover music where you least expect it. composition turns out to be the creation of situations in which music becomes possible, composers work not with ready-made material, but with possibilities - they don&#x27;t so much assert as they suggest and provoke. in this context, teaching isn&#x27;t about transferring knowledge, but about putting it into question. if composition is creating something that doesn’t yet exist - can one teach something that doesn’t exist? music arises where control loosens enough to allow the unknown to emerge.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s30" data-index="30" data-label="28">
+  <div class="ghost-number">28</div>
+  <div class="rail">
+    <div class="rail-label">28</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>art moves in opposition to conventionalization. periods of conventionalization in history are defined by epochs of established schools and traditions. today, when a historical epoch is reduced to a single generation*, an entire artistic epoch/tradition/school can be embodied in the work of a single composer or even within a framework of a single composition (f.e. an epoch which lasts 4&#x27;33&quot;) - each new work is left to be either a revolution (read: a catastrophe that tears the past away from the present, opening up possibilities for dialogue) or a convention (read: disappearing into the voices of the past, even the very recent past). art has come to the need for permanent revolution (the realization of which, however, faces resistance from the economics of conventionalization).</p>
+<p>* - russian physicist and demographer Sergey Kapitsa argues that historical epochs aren’t measured by clock time but by demographics: each epoch corresponds to about 10 billion people living through it. he cites the neolithic (~2 million years), the middle ages (~10 centuries), and the modern era (~125 years) - each reaching this number. today, with almost 8 billion people living at once, we’re nearing that threshold, so an “epoch” now lasts one generation.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s31" data-index="31" data-label="29">
+  <div class="ghost-number">29</div>
+  <div class="rail">
+    <div class="rail-label">29</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>art is often not about control, but about submission to the rule (which does not exclude playing with it) - manifestation through erasure, affirmation through refusal (the rule can be either historically predetermined or situational, discovered in the present). it is a type of art situated within an epic perspective - of the existence and action in the light of final knowledge. in this perspective, strict polyphony, serialism, and (in a way) radical minimalism converge. the epic perspective is opposed by the historical perspective: where time unfolds in becoming; where truth is not given but is produced anew each time; where the subject does not dissolve into the rule but constitutes itself through constant choice and refusal. this is the perspective in which artistic perception lives. this perspective contradicts the fixation and reproduction - the fixed work can only pretend not to know its own ending, turning into a fiction attraction. perhaps this was the root of the romantic hero’s failure. art is an epic that designates the viewer/listener as its hero.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s32" data-index="32" data-label="30">
+  <div class="ghost-number">30</div>
+  <div class="rail">
+    <div class="rail-label">30</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>i composed a piece. now i need to compose a world capable of perceiving it.</p>
+<p>there is a danger in music, a temptation to reduce its purpose and function to the ecstatic manifestation of the very fact that it is music (what is commonly referred to as music). without doubt or self-distance. and to project this ecstasy onto the audience, demanding adoration and admiration. not to call for the reconstruction of the world, not to cultivate a new hearing - but to fit into the existing patterns (which in itself is neither bad nor good). this narcissistic drive in music easily finds support, as it guarantees the predictability of the material, keeps music within expectations, and at the same time satisfies them. ouroboros. however, this way, the focus is not on the music itself, but on this act of self-satisfaction, where music is merely a pretext.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s33" data-index="33" data-label="31">
+  <div class="ghost-number">31</div>
+  <div class="rail">
+    <div class="rail-label">31</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>&quot;art is beyond politics&quot; is an oxymoron. art is always within politics, and artists turn a blind eye to this to varying extents. from complete denial to complete identification (which reveals another extreme, equally far from the truth, because art is within politics but not equal to it - it is its instrument). politics manipulates art for its own interests, using it and artists as a cover for its narratives. art provides politics with an additional platform, a rear guard, an alibi. the more visible this platform is, the more open the political narrative around, the more signs there are that art is being used for political purposes. for an artist to deny this is either hypocrisy or a sign of a serious personal conflict.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s34" data-index="34" data-label="32">
+  <div class="ghost-number">32</div>
+  <div class="rail">
+    <div class="rail-label">32</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>there is a type of perception that seeks constant confirmation and support through comparison - every object or event finds its counterpart or predecessor. &quot;this has already been done,&quot; &quot;this is like that,&quot; &quot;this is similar to.&quot; no, no - and no. on the one hand, this reveals a need to devalue the object’s intrinsic value, i.e., it is important for the perceiver to neutralize the threat of the object’s superiority (i.e., otherness is interpreted as superiority). on the other hand, the search for external support speaks to a lack of confidence in one’s own opinion, a search for authorities to whom one can delegate part of the responsibility. when confronted with two different objects, such a perception begins to look for how they are similar, in order to categorize and place them in context*. but it can also be different: when confronted with two identical objects, the opportunity arises to discover their difference. the difference between one and the same. the comma in which the art of perception breathes (and at the same time the danger of difference, i.e., of loneliness).</p>
+<p>•⁠ ⁠- contextualisation is undoubtedly important, but within it lies the danger of equating the individual.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s35" data-index="35" data-label="33">
+  <div class="ghost-number">33</div>
+  <div class="rail">
+    <div class="rail-label">33</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>music does not transmit a message; rather, it creates the conditions for a message to emerge, always targeted and personal. the musical culture seeks to turn a targeted message into a mass mailing. music is not a language. it has no definitive meaning. musical culture seeks to tame this indefiniteness: to give sound a name, a function, a genre, a code, a flag. where music begins to signify, it becomes a convention, an agreement, a sign of belonging. a sign of belonging creates a boundary: us/them, right/wrong, high/low, native/foreign, pure/corrupted. and where a boundary appears, war begins.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s36" data-index="36" data-label="34">
+  <div class="ghost-number">34</div>
+  <div class="rail">
+    <div class="rail-label">34</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>a musical work is a space unfolding over time. perception (as well as composition and performance) is the discovery of the properties of this space and the process of adapting to it. in the process of adaptation, certain habitual patterns of perception become powerless, opening up the possibility of developing new ones. experiencing a work - in the process of creation, performance, and perception - is like discovering oneself in a new environment, on new territory. the author, performers, and listeners find themselves as refugees who must go through all the stages of rediscovering themselves: adaptation (the painful stage of acquiring a new body, language, and hearing), integration (entering into communication with the environment), and, finally, distancing themselves from their old memory and acquiring a new one.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s37" data-index="37" data-label="35">
+  <div class="ghost-number">35</div>
+  <div class="rail">
+    <div class="rail-label">35</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>digest-culture is a culture of extracting the most effective and impressive elements from a broad cultural text (both historical and contemporary). it is as much a culture of admiration and fascination as it is of fear of disorientation and loss of interest. this culture works to recognize, confirm, and affirm existing systems of expectations and preferences. however, digest-culture does not exclude virtuosity and talent in execution. it is not a culture of process or change, but a culture of stability and mastery.</p>
+<p>digest-culture is opposed by the culture of the original, which works toward non-recognition and difference. this is a hypothesis with no guarantee of success. the culture of the original introduces new elements into the cultural field, triggering a process of reconfiguration. this causes concern and, at times, resistance from a culture oriented towards sustainability and, at times, almost conveyor-belt reproducibility.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s38" data-index="38" data-label="36">
+  <div class="ghost-number">36</div>
+  <div class="rail">
+    <div class="rail-label">36</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>artists are slaves to their medium. art is the experience of - and the quest to overcome - the constraints imposed by that medium.</p>
+<p>dance - beyond gravity. music - beyond sound. painting - beyond the image. literature - between the lines. theater - beyond the fourth wall. cinema - behind the scenes. photography - beyond the frame.</p>
+<p>the medium is not an instrument, but resistance; the artwork is not a form, but an escape from it.</p>
+<p>only mass-oriented* art is satisfied with and praises its medium (be it a movie, a song, a symphony orchestra or a theater stage).</p>
+<p>* - it is important to note here that “mass-oriented” actually means focused on the formation of the masses.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s39" data-index="39" data-label="37">
+  <div class="ghost-number">37</div>
+  <div class="rail">
+    <div class="rail-label">37</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>&#x27;easy listening&#x27; is not actually a characteristic of what is being listened to, but rather a characteristic of the act of listening itself. any music of any formal structure, any acoustic situation, can be an experience of &#x27;complex listening&#x27;. moreover, what seems easy to perceive in fact often requires a greater effort from the listener to recognize the complexity. and, conversely, behind a complexly structured form or sound may lie a greater inertia of formal satisfaction of certain obligations. just as &quot;beauty is in the eye of the beholder,&quot; so too is &quot;complexity.&quot;</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s40" data-index="40" data-label="38">
+  <div class="ghost-number">38</div>
+  <div class="rail">
+    <div class="rail-label">38</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>the phrase &quot;all has already been&quot; sounds like a historical judgment, but functions as a rhetorical gesture: it does not so much describe a phenomenon as it does eliminate the need to examine it. it is a way of dismissing differences by declaring them insignificant. at the same time, the notion of radical novelty is just as mythical. artistic phenomena do not arise out of nothing. they reassemble our relationship with reality. often, the stimulus for this reassembly comes from the invention or discovery of a new tool, a medium. &quot;the medium is the message.&quot; but the &quot;message&quot; remains itself, regardless of the medium. most often, one and the same - ourselves. the dichotomy itself - was / was not - is false. nothing &quot;was&quot; everything &quot;is&quot; - and lives in distinction.</p>
+  </div>
+</section>
+<section class="panel text-panel" id="s41" data-index="41" data-label="39">
+  <div class="ghost-number">39</div>
+  <div class="rail">
+    <div class="rail-label">39</div>
+    <div class="rail-line"></div>
+  </div>
+  <div class="text-wrap">
+    <p>whenever someone asks me how long it took me to write a particular piece, i always refer to my age. 30 years, 40 years, 50. composition has no starting point, but there are moments when lived experience hardens into form, into an imprint. composition is a property of perception, an (auto)translation of cognitive experience into acoustic resonances, endowing time with the characteristics of a space open to inhabitation.</p>
+  </div>
+</section>
+
+<div class="nav">
+  <button id="prev" aria-label="previous">↑</button>
+  <button id="next" aria-label="next">↓</button>
+</div>
+
+<script>
+const panels=[...document.querySelectorAll('.panel')];
+const count=document.getElementById('count');
+const progress=document.getElementById('progress');
+
+document.querySelectorAll('.text-panel').forEach(p=>{
+  const txt=p.querySelector('.text-wrap').innerText.trim();
+  if(txt.length<420) p.classList.add('short');
+});
+
+function activeIndex(){
+  let best=0,dist=Infinity;
+  panels.forEach((p,i)=>{
+    const d=Math.abs(p.getBoundingClientRect().top);
+    if(d<dist){dist=d;best=i}
+  });
+  return best;
+}
+function update(){
+  const i=activeIndex();
+  count.textContent=i;
+  progress.style.width=((i/(panels.length-1))*100)+'%';
+}
+function go(delta){
+  const i=Math.max(0,Math.min(panels.length-1,activeIndex()+delta));
+  panels[i].scrollIntoView({behavior:'smooth',block:'start'});
+}
+document.getElementById('prev').onclick=()=>go(-1);
+document.getElementById('next').onclick=()=>go(1);
+addEventListener('scroll',()=>requestAnimationFrame(update),{passive:true});
+addEventListener('keydown',e=>{
+  if(['ArrowDown','PageDown',' ','ArrowRight'].includes(e.key)){e.preventDefault();go(1)}
+  if(['ArrowUp','PageUp','ArrowLeft'].includes(e.key)){e.preventDefault();go(-1)}
+});
+update();
+</script>
+</body>
+</html>
