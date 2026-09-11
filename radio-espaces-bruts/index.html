@@ -8,7 +8,7 @@
 </head>
 <body>
 <main class="page">
-<video id="bgVideo" class="bg-video" autoplay muted loop playsinline preload="auto">
+<video id="bgVideo" class="bg-video" autoplay muted loop playsinline preload="auto" disablepictureinpicture>
 <source src="https://video.wixstatic.com/video/9c9f19_60f19be18fef4c9ca4a11308755c7dc8/480p/mp4/file.mp4" type="video/mp4">
 </video>
 
@@ -32,6 +32,33 @@
 </section>
 </main>
 
+<script>
+const bgVideo = document.getElementById("bgVideo");
+
+function startBackgroundVideo() {
+  if (!bgVideo) return;
+  bgVideo.muted = true;
+  bgVideo.defaultMuted = true;
+  bgVideo.volume = 0;
+  bgVideo.controls = false;
+  const p = bgVideo.play();
+  if (p && typeof p.catch === "function") p.catch(() => {});
+}
+
+if (bgVideo) {
+  startBackgroundVideo();
+  bgVideo.addEventListener("loadeddata", startBackgroundVideo, { once: true });
+  bgVideo.addEventListener("canplay", startBackgroundVideo, { once: true });
+
+  // Safari can still block remote autoplay; the first user gesture starts it.
+  document.addEventListener("pointerdown", startBackgroundVideo, { once: true, capture: true });
+  document.addEventListener("touchstart", startBackgroundVideo, { once: true, capture: true });
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && bgVideo.paused) startBackgroundVideo();
+  });
+}
+</script>
 <script src="player.js"></script>
 </body>
 </html>

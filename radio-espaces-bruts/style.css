@@ -189,3 +189,18 @@ button:focus-visible {
     margin-bottom: 38px;
   }
 }
+
+
+/* Background video is decorative: never show browser-native video controls. */
+.bg-video {
+  pointer-events: none;
+}
+
+.bg-video::-webkit-media-controls,
+.bg-video::-webkit-media-controls-panel,
+.bg-video::-webkit-media-controls-play-button,
+.bg-video::-webkit-media-controls-start-playback-button {
+  display: none !important;
+  -webkit-appearance: none;
+  opacity: 0;
+}
