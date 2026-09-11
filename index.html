@@ -325,18 +325,16 @@ footer{
 
 .full-bio-link{display:inline-block;margin-left:.65em;font-family:Arial,Helvetica,sans-serif;font-size:.68em;letter-spacing:.1em;white-space:nowrap;border-bottom:1px solid currentColor;padding-bottom:1px}
 
-.current-projects{margin-top:72px;padding-top:24px;border-top:1px solid rgba(0,0,0,.28)}
+.current-projects{padding:10vh 28px 12vh;border-bottom:1px solid var(--line)}
 .current-projects-label{margin-bottom:30px;font-size:11px;letter-spacing:.12em}
-.project{display:grid;grid-template-columns:minmax(180px,1fr) minmax(240px,1.25fr);column-gap:40px;padding:20px 0;border-top:1px solid rgba(0,0,0,.14)}
+.project{display:block;padding:22px 0;border-bottom:1px solid var(--line)}
 .project:first-of-type{border-top:0}
-.project h3{grid-column:1;margin:0 0 5px;font-size:18px;font-weight:400;line-height:1.2}
-.project-spec{grid-column:1;font-size:12px;line-height:1.45;opacity:.68}
-.project p{grid-column:2;grid-row:1 / span 2;margin:0;font-size:13px;line-height:1.55}
+.project h3{margin:0 0 3px;font-size:clamp(22px,2.1vw,31px);font-weight:400;line-height:1.1;letter-spacing:-.025em;overflow-wrap:anywhere}
+.project-spec{font-size:13px;line-height:1.45;color:inherit;overflow-wrap:anywhere}
+.project p{margin:10px 0 0;font-size:13px;line-height:1.55;overflow-wrap:anywhere}
 @media(max-width:700px){.current-projects{margin-top:52px}.project{display:block;padding:18px 0}.project h3{font-size:17px}.project-spec{margin:4px 0 12px}.project p{font-size:12px}}
 
-.facts-section{padding:0 28px 10vh;border-bottom:1px solid var(--line)}
-.facts-section .facts{margin-left:196px;max-width:780px}
-@media(max-width:900px){.facts-section{padding:0 18px 8vh}.facts-section .facts{margin-left:0;margin-top:0}}
+
 
 </style>
 </head>
@@ -395,17 +393,7 @@ footer{
 <article class="project"><h3>Temporary Architecture</h3><div class="project-spec">for saxophone, accordion, viola and electronics · 25 min.</div><p>Commissioned by the Ernst von Siemens Music Foundation for Trio Æther.<br>Premiere: 6 December 2026, Sonus Novus concert series, Munich.</p></article>
 <article class="project"><h3>Espaces bruts. Re-inhabitation</h3><div class="project-spec">installation for 6 spaces, video and electronics · open duration</div><p>Produced by STOPera.<br>Premiere planned for the 2027/28 season. More information to follow.</p></article>
 </section>
-
-  <section class="facts-section">
-    <div class="facts">
-      <div class="fact"><span>born</span><span>1976, Moscow</span></div>
-      <div class="fact"><span>based</span><span>France</span></div>
-      <div class="fact"><span>fields</span><span>acoustic · electronic · stage · installation</span></div>
-      <div class="fact"><span>publishers</span><span>Donemus · Éditions Jobert</span></div>
-    </div>
-  </section>
-
-  <section class="links" aria-label="Site sections">
+<section class="links" aria-label="Site sections">
     <a class="link-row" href="works.html">
       <div class="n">02</div><div class="title">works</div><div class="arrow">↗</div>
     </a>
