@@ -343,3 +343,81 @@ button:focus-visible {
     padding: 30px 24px 24px;
   }
 }
+
+
+/* Desktop info panel fix */
+.info-panel {
+  right: 28px;
+  bottom: 28px;
+  left: auto;
+  width: min(540px, calc(100vw - 56px));
+  max-width: 540px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.info-panel h2,
+.info-panel p,
+.info-panel .info-meta,
+.info-link-row {
+  width: auto;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.info-close {
+  all: unset;
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: rgba(255,255,255,.62);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 24px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.info-close:hover { color: #fff; }
+.info-close:focus-visible { outline: 1px solid #fff; outline-offset: 3px; }
+
+.info-button {
+  all: unset;
+  position: fixed;
+  right: 20px;
+  bottom: 18px;
+  z-index: 6;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: rgba(255,255,255,.58);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 21px;
+  line-height: 1;
+}
+
+.info-button:hover { color: #fff; }
+.info-button:focus-visible { outline: 1px solid #fff; outline-offset: 4px; }
+
+@media (max-width: 600px) {
+  .info-panel {
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    width: auto;
+    max-width: none;
+  }
+  .info-button { right: 14px; bottom: 14px; }
+}
