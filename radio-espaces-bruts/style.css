@@ -204,3 +204,142 @@ button:focus-visible {
   -webkit-appearance: none;
   opacity: 0;
 }
+
+
+.info-button {
+  position: fixed;
+  right: 20px;
+  bottom: 18px;
+  z-index: 6;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255,255,255,.58);
+  font-size: 22px;
+  line-height: 1;
+  padding: 0;
+}
+
+.info-button:hover {
+  background: transparent;
+  color: #fff;
+  transform: none;
+}
+
+.info-button:focus-visible {
+  outline: 1px solid #fff;
+  outline-offset: 4px;
+}
+
+.info-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: none;
+}
+
+.info-modal.is-open {
+  display: block;
+}
+
+.info-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.68);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.info-panel {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  width: min(520px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 34px 34px 30px;
+  background: rgba(5,5,5,.92);
+  border: 1px solid rgba(255,255,255,.18);
+  color: #fff;
+  text-align: left;
+}
+
+.info-panel h2 {
+  margin: 0 44px 8px 0;
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: .12em;
+}
+
+.info-panel p {
+  margin: 0 0 18px;
+  font-size: 13px;
+  line-height: 1.55;
+  letter-spacing: .01em;
+  opacity: .9;
+}
+
+.info-panel .info-meta {
+  margin-bottom: 24px;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: lowercase;
+  opacity: .58;
+}
+
+.info-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,.6);
+  font-size: 26px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.info-close:hover {
+  background: transparent;
+  color: #fff;
+  transform: none;
+}
+
+.info-link-row {
+  margin-top: 28px !important;
+  margin-bottom: 0 !important;
+}
+
+.info-link-row a {
+  color: #fff;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255,255,255,.45);
+  padding-bottom: 2px;
+  letter-spacing: .08em;
+  font-size: 11px;
+}
+
+.info-link-row a:hover {
+  border-bottom-color: #fff;
+}
+
+@media (max-width: 600px) {
+  .info-button {
+    right: 14px;
+    bottom: 14px;
+  }
+
+  .info-panel {
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    width: auto;
+    max-height: calc(100vh - 28px);
+    padding: 30px 24px 24px;
+  }
+}

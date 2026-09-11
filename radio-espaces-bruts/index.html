@@ -30,6 +30,21 @@
 <span id="icon">▶</span>
 </button>
 </section>
+
+<button id="infoToggle" class="info-button" type="button" aria-label="Project information">ⓘ</button>
+
+<div id="infoModal" class="info-modal" aria-hidden="true">
+  <div class="info-backdrop"></div>
+  <section class="info-panel" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+    <button id="infoClose" class="info-close" type="button" aria-label="Close information">×</button>
+    <h2 id="infoTitle">ESPACES BRUTS</h2>
+    <p class="info-meta">2025–2026 · approx. 9 hours · 24 environments · random continuous playback</p>
+    <p>Espaces bruts is an archive of reconstructed sound environments. The materials originate from abandoned recordings, unfinished sketches and discarded digital debris. Through stretching, erosion, layering and sound recycling, these remnants become inhabitable acoustic spaces.</p>
+    <p>The online player randomly selects the environments and overlaps them into a continuous stream with no fixed beginning, end or sequence. Each listening session unfolds differently.</p>
+    <p class="info-link-row"><a href="https://kourliandski.bandcamp.com/merch/espaces-bruts" target="_blank" rel="noopener noreferrer">PHYSICAL EDITION ↗</a></p>
+  </section>
+</div>
+
 </main>
 
 <script>
@@ -59,6 +74,34 @@ if (bgVideo) {
   });
 }
 </script>
+
+<script>
+const infoToggle = document.getElementById("infoToggle");
+const infoModal = document.getElementById("infoModal");
+const infoClose = document.getElementById("infoClose");
+
+function openInfo() {
+  infoModal.classList.add("is-open");
+  infoModal.setAttribute("aria-hidden", "false");
+}
+
+function closeInfo() {
+  infoModal.classList.remove("is-open");
+  infoModal.setAttribute("aria-hidden", "true");
+}
+
+if (infoToggle && infoModal && infoClose) {
+  infoToggle.addEventListener("click", openInfo);
+  infoClose.addEventListener("click", closeInfo);
+  infoModal.addEventListener("click", (e) => {
+    if (e.target.classList.contains("info-backdrop")) closeInfo();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeInfo();
+  });
+}
+</script>
+
 <script src="player.js"></script>
 </body>
 </html>
