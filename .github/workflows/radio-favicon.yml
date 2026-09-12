@@ -1,0 +1,39 @@
+name: Radio favicon setup
+on:
+  push:
+    paths: ['.github/workflows/radio-favicon.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set radio favicon
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          root=Path('radio-espaces-bruts')
+          for p in root.rglob('*.html'):
+              s=p.read_text(encoding='utf-8')
+              # Replace any existing favicon link; otherwise insert one.
+              pat=r'<link\b[^>]*\brel=["\'](?:shortcut icon|icon)["\'][^>]*>'
+              tag='<link rel="icon" type="image/png" href="/radio-espaces-bruts/favicon.png">'
+              if re.search(pat,s,re.I):
+                  s=re.sub(pat,tag,s,flags=re.I)
+              else:
+                  i=s.lower().find('</head>')
+                  if i>=0: s=s[:i]+tag+'\n'+s[i:]
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Remove temporary workflow
+        run: rm -f .github/workflows/radio-favicon.yml
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Use custom favicon for Espaces Bruts radio" || exit 0
+          git push
