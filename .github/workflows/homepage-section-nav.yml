@@ -1,4 +1,4 @@
-name: Homepage section navigation
+name: Homepage mobile navigation
 
 on:
   push:
@@ -13,13 +13,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Update navigation
+      - name: Fix mobile navigation
         run: |
-          python3 -c "from pathlib import Path; p=Path('index.html'); s=p.read_text(); a=s.index('  <nav>'); b=s.index('  </nav>',a)+len('  </nav>'); n='  <nav>\n    <a href=\"#bio\">bio</a>\n    <a href=\"#current-projects\">projects</a>\n    <a href=\"#archive\">archive</a>\n    <a href=\"#contact\">contact</a>\n    <a href=\"https://www.kourliandski.com/radio-espaces-bruts\" target=\"_blank\" rel=\"noopener\">radio</a>\n  </nav>'; s=s[:a]+n+s[b:]; s=s.replace('<section class=\"links\" aria-label=\"Site sections\">','<section class=\"links\" id=\"archive\" aria-label=\"Site sections\">',1); p.write_text(s)"
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = '''  nav a:nth-child(2),
+  nav a:nth-child(3),
+  nav a:nth-child(4){display:none}
+'''
+          s = s.replace(old, '', 1)
+          marker = '@media(max-width:700px){.current-projects'
+          mobile = '''@media(max-width:700px){
+  header{justify-content:center}
+  .brand{display:none}
+  nav{width:100%;justify-content:space-between;gap:7px;font-size:9px}
+}
+
+'''
+          if mobile not in s:
+              s = s.replace(marker, mobile + marker, 1)
+          p.write_text(s, encoding='utf-8')
+          PY
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Use section navigation on homepage"
+          git commit -m "Show homepage navigation on mobile" || exit 0
           git push
