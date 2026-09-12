@@ -1,0 +1,58 @@
+name: Add Google Analytics
+
+on:
+  push:
+    paths:
+      - '.github/workflows/add-google-analytics.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  analytics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add GA4 to HTML pages
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          tag = '''<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0EQRQNJWB7"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-0EQRQNJWB7');
+</script>'''
+
+          changed = []
+          for p in Path('.').rglob('*.html'):
+              if '.git' in p.parts:
+                  continue
+              text = p.read_text(encoding='utf-8')
+              if 'G-0EQRQNJWB7' in text:
+                  continue
+              if '</head>' not in text.lower():
+                  continue
+              pos = text.lower().find('</head>')
+              text = text[:pos] + tag + '\n' + text[pos:]
+              p.write_text(text, encoding='utf-8')
+              changed.append(str(p))
+          print('Updated:', *changed, sep='\n')
+          PY
+      - name: Remove temporary workflow
+        run: rm -f .github/workflows/add-google-analytics.yml
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Add Google Analytics to site"
+            git push
+          fi
