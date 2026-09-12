@@ -1,0 +1,54 @@
+name: Switch favicon references
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  switch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update favicon links
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          main_links = '''<link rel="icon" type="image/png" sizes="32x32" href="/main-favicon-32.png?v=2">
+          <link rel="icon" type="image/png" sizes="16x16" href="/main-favicon-16.png?v=2">
+          <link rel="shortcut icon" href="/main-favicon.ico?v=2">'''
+          radio_links = '''<link rel="icon" type="image/png" sizes="32x32" href="/radio-espaces-bruts/radio-favicon-32.png?v=2">
+          <link rel="icon" type="image/png" sizes="16x16" href="/radio-espaces-bruts/radio-favicon-16.png?v=2">
+          <link rel="shortcut icon" href="/radio-espaces-bruts/radio-favicon.ico?v=2">'''
+
+          icon_re = re.compile(r'\s*<link\s+[^>]*rel=["\'](?:shortcut\s+icon|icon)["\'][^>]*>\s*', re.I)
+
+          for p in Path('.').glob('*.html'):
+              text = p.read_text(encoding='utf-8')
+              text2 = icon_re.sub('\n', text)
+              if '</head>' in text2:
+                  text2 = text2.replace('</head>', main_links + '\n</head>', 1)
+              if text2 != text:
+                  p.write_text(text2, encoding='utf-8')
+
+          p = Path('radio-espaces-bruts/index.html')
+          text = p.read_text(encoding='utf-8')
+          text2 = icon_re.sub('\n', text)
+          if '</head>' in text2:
+              text2 = text2.replace('</head>', radio_links + '\n</head>', 1)
+          if text2 != text:
+              p.write_text(text2, encoding='utf-8')
+          PY
+      - name: Commit changes and remove this workflow
+        run: |
+          rm .github/workflows/switch-favicons.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Switch site to uploaded favicon files" || exit 0
+          git push
