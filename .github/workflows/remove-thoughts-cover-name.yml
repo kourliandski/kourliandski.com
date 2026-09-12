@@ -1,0 +1,32 @@
+name: Remove duplicate name from Thoughts cover
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove cover name
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('thoughts.html')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('    <div class="cover-small">Dmitri Kourliandski</div>\n','',1)
+          p.write_text(s,encoding='utf-8')
+          Path('.github/workflows/remove-thoughts-cover-name.yml').unlink(missing_ok=True)
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Remove duplicate name from Thoughts cover"
+          git push
