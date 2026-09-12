@@ -1,0 +1,87 @@
+name: Site polish
+on:
+  push:
+    paths: ['.github/workflows/site-polish.yml']
+permissions:
+  contents: write
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Polish site
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          pages = {
+            'index.html': ('Dmitri Kourliandski — Composer', 'Official website of composer Dmitri Kourliandski: biography, works, releases, texts, current projects and contact.'),
+            'biography.html': ('Biography — Dmitri Kourliandski', 'Biography of composer Dmitri Kourliandski, based in France.'),
+            'works.html': ('Works — Dmitri Kourliandski', 'Selected works by composer Dmitri Kourliandski.'),
+            'releases.html': ('Releases — Dmitri Kourliandski', 'Selected recordings and releases by Dmitri Kourliandski.'),
+            'bibliography.html': ('Bibliography — Dmitri Kourliandski', 'Selected bibliography, articles and texts about Dmitri Kourliandski.'),
+            'thoughts.html': ('Thoughts & Quotes — Dmitri Kourliandski', 'Thoughts, notes and quotations by composer Dmitri Kourliandski.')
+          }
+          for fn,(title,desc) in pages.items():
+              p=Path(fn); s=p.read_text()
+              s=re.sub(r'<title>.*?</title>', f'<title>{title}</title>', s, count=1, flags=re.S)
+              meta=f'<meta name="description" content="{desc}">'
+              if re.search(r'<meta\s+name=["\']description["\'][^>]*>',s,re.I):
+                  s=re.sub(r'<meta\s+name=["\']description["\'][^>]*>',meta,s,count=1,flags=re.I)
+              else:
+                  s=s.replace('</title>', '</title>\n'+meta,1)
+              url='https://www.kourliandski.com/' + ('' if fn=='index.html' else fn)
+              og=(f'\n<meta property="og:title" content="{title}">\n'
+                  f'<meta property="og:description" content="{desc}">\n'
+                  f'<meta property="og:type" content="website">\n'
+                  f'<meta property="og:url" content="{url}">\n'
+                  f'<meta property="og:image" content="https://www.kourliandski.com/kourliandski_photo.jpg">\n'
+                  f'<meta name="twitter:card" content="summary_large_image">\n'
+                  f'<link rel="icon" href="favicon.svg" type="image/svg+xml">')
+              if 'property="og:title"' not in s:
+                  s=s.replace(meta,meta+og,1)
+              p.write_text(s)
+
+          Path('favicon.svg').write_text('''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#11110f"/><text x="32" y="40" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="25" fill="#f2eee6">DK</text></svg>''')
+          Path('404.html').write_text('''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>404 — Dmitri Kourliandski</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><style>html,body{margin:0;min-height:100%;background:#f2eee6;color:#11110f;font-family:Arial,Helvetica,sans-serif}main{min-height:100vh;display:flex;flex-direction:column;justify-content:space-between;padding:28px;box-sizing:border-box}.n{font-size:11px;letter-spacing:.13em}.msg{font-size:clamp(54px,11vw,150px);line-height:.85;letter-spacing:-.07em}.home{font-size:12px;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid;align-self:flex-start;text-decoration:none;color:inherit;padding-bottom:3px}</style></head><body><main><div class="n">404</div><div class="msg">nothing<br>here</div><a class="home" href="index.html">← home</a></main></body></html>''')
+
+          # Mobile navigation: keep it usable on narrow screens without changing desktop design.
+          for fn in pages:
+              p=Path(fn); s=p.read_text()
+              if fn=='index.html':
+                  mobile='''\n@media(max-width:430px){header{padding:0 12px}.brand{max-width:108px;line-height:1.1}nav{gap:9px;font-size:9px}nav a:nth-child(2),nav a:nth-child(3),nav a:nth-child(4),nav a:nth-child(5){display:none}}\n'''
+              else:
+                  mobile='''\n@media(max-width:430px){.global-site-nav,.site-nav,nav{font-size:9px;gap:10px;padding-left:12px;padding-right:12px}.global-site-nav .nav-right,.nav-right{gap:10px}}\n'''
+              if '@media(max-width:430px)' not in s:
+                  s=s.replace('</style>',mobile+'</style>',1)
+              p.write_text(s)
+
+          # Remove this workflow after its one-time run.
+          Path('.github/workflows/site-polish.yml').unlink()
+          PY
+      - name: Check local links
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re, urllib.parse
+          files=list(Path('.').glob('*.html'))
+          missing=[]
+          for p in files:
+              s=p.read_text()
+              for href in re.findall(r'href=["\']([^"\']+)',s,re.I):
+                  if href.startswith(('http://','https://','mailto:','#','javascript:')): continue
+                  path=urllib.parse.urlsplit(href).path
+                  if not path: continue
+                  q=(p.parent/path)
+                  if not q.exists(): missing.append((str(p),href))
+          if missing:
+              raise SystemExit('Missing local links: '+repr(missing))
+          print('Local links OK')
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Polish mobile layout metadata favicon and 404 page"
+          git push
