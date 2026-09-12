@@ -1,4 +1,4 @@
-name: Align homepage section labels
+name: Match current projects spacing
 
 on:
   push:
@@ -13,14 +13,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Align section labels
+      - name: Match section spacing
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          s=s.replace('<div class="current-projects-label">02 / current projects</div>','<div class="section-no current-projects-label">02 / current projects</div>',1)
-          s=s.replace('.current-projects-label{margin-bottom:30px;font-size:11px;letter-spacing:.12em}', '.current-projects-label{margin-bottom:30px}',1)
+          s=s.replace('.current-projects{padding:10vh 28px 12vh;border-bottom:1px solid var(--line)}','.current-projects{padding:11vh 28px 12vh;border-bottom:1px solid var(--line)}',1)
+          old='  .bio{\n    grid-template-columns:1fr;\n    gap:26px;\n    padding:9vh 18px;\n  }'
+          new=old+'\n  .current-projects{padding:9vh 18px 12vh}'
+          if '.current-projects{padding:9vh 18px 12vh}' not in s:
+              s=s.replace(old,new,1)
+          s=s.replace('@media(max-width:700px){.current-projects{margin-top:52px}.project{display:block;padding:18px 0}', '@media(max-width:700px){.project{display:block;padding:18px 0}',1)
           p.write_text(s,encoding='utf-8')
           PY
       - name: Commit
@@ -28,5 +32,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Align homepage section labels"
+          git commit -m "Match current projects section spacing"
           git push
