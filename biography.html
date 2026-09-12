@@ -5,12 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Biography — Dmitri Kourliandski</title>
 <style>
-:root{--paper:#f2eee6;--ink:#111;--nav-h:58px}
+:root{--paper:#f2eee6;--ink:#111;--sitebar-h:46px}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--paper);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
 a{color:inherit;text-decoration:none}
-nav{position:sticky;top:0;z-index:20;height:var(--nav-h);display:flex;align-items:center;gap:28px;padding:0 30px;background:rgba(242,238,230,.96);border-bottom:1px solid rgba(0,0,0,.14);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
-nav a:first-child{margin-right:auto}
+.global-site-nav{position:sticky;top:0;z-index:10000;height:var(--sitebar-h);display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 4vw;border-bottom:1px solid rgba(0,0,0,.13);background:rgba(242,238,230,.96);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1;letter-spacing:.09em;text-transform:uppercase}
+.global-site-nav a{color:inherit!important;text-decoration:none!important;font-size:11px!important;white-space:nowrap}
+.global-site-nav a:hover{opacity:.55}
+.global-site-nav .nav-right{display:flex;align-items:center;gap:18px;min-width:0}
 main{max-width:900px;margin:0 auto;padding:72px 38px 110px}
 .kicker{font-size:11px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:18px}
 h1{font-size:clamp(34px,5vw,66px);font-weight:400;letter-spacing:-.035em;line-height:.95;margin:0 0 56px}
@@ -21,10 +23,11 @@ em{font-style:italic}
 strong{font-weight:600}
 .back{display:inline-block;margin-top:34px;font-size:11px;text-transform:uppercase;letter-spacing:.12em;border-bottom:1px solid currentColor;padding-bottom:3px}
 .back-top{margin-top:0;margin-bottom:34px}
-@media(max-width:700px){
- :root{--nav-h:54px}
- nav{gap:14px;padding:0 16px;overflow-x:auto;white-space:nowrap;font-size:10px}
- nav a:first-child{margin-right:10px}
+@media(max-width:760px){
+ :root{--sitebar-h:44px}
+ .global-site-nav{padding:0 16px;gap:12px}
+ .global-site-nav .nav-right{gap:11px}
+ .global-site-nav .nav-right a:nth-child(3),.global-site-nav .nav-right a:nth-child(4){display:none}
  main{padding:46px 20px 80px}
  h1{margin-bottom:38px}
  p{font-size:17px;line-height:1.58}
@@ -36,13 +39,17 @@ strong{font-weight:600}
 <link rel="shortcut icon" href="/main-favicon.ico?v=2">
 </head>
 <body>
-<nav>
+<nav class="global-site-nav" aria-label="Site navigation">
+  <a href="index.html">Dmitri Kourliandski</a>
+  <div class="nav-right">
     <a href="works.html">works</a>
     <a href="releases.html">releases</a>
+    <a href="bibliography.html">bibliography</a>
     <a href="thoughts.html">thoughts</a>
     <a href="https://www.kourliandski.com/radio-espaces-bruts" target="_blank" rel="noopener">radio</a>
     <a href="index.html#contact">contact</a>
-  </nav>
+  </div>
+</nav>
 <main>
 <a class="back back-top" href="index.html">← Home</a>
 <div class="kicker">Biography</div>
