@@ -1,4 +1,4 @@
-name: Homepage anchor offset
+name: Homepage section numbering
 
 on:
   push:
@@ -13,18 +13,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fix anchor offset
+      - name: Number homepage sections
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          desktop='#bio,#current-projects,#archive,#contact{scroll-margin-top:58px}\n'
-          mobile='  #bio,#current-projects,#archive,#contact{scroll-margin-top:54px}\n'
-          if desktop not in s:
-              s=s.replace('html{scroll-behavior:smooth}\n','html{scroll-behavior:smooth}\n'+desktop,1)
-          if mobile not in s:
-              s=s.replace('@media(max-width:900px){\n','@media(max-width:900px){\n'+mobile,1)
+          s=s.replace('<div class="current-projects-label">CURRENT PROJECTS</div>','<div class="current-projects-label">02 / current projects</div>',1)
+          s=s.replace('<section class="links" id="archive" aria-label="Site sections">','<section class="links" id="archive" aria-label="Site sections">\n    <div class="section-no archive-label">03 / archive</div>',1)
+          s=s.replace('<div class="n">02</div><div class="title">works</div>','<div class="n"></div><div class="title">works</div>',1)
+          s=s.replace('<div class="n">03</div><div class="title">releases</div>','<div class="n"></div><div class="title">releases</div>',1)
+          s=s.replace('<div class="n">04</div><div class="title">bibliography</div>','<div class="n"></div><div class="title">bibliography</div>',1)
+          s=s.replace('<div class="n">05</div><div class="title">thoughts &amp; quotes</div>','<div class="n"></div><div class="title">thoughts &amp; quotes</div>',1)
+          s=s.replace('<div class="n">06</div><div class="title">radio espaces bruts</div>','<div class="n"></div><div class="title">radio espaces bruts</div>',1)
+          s=s.replace('<div class="section-no">07 / contact</div>','<div class="section-no">04 / contact</div>',1)
+          if '.archive-label{' not in s:
+              s=s.replace('.links{\n  padding:0 28px;\n}','.links{\n  padding:0 28px;\n}\n.archive-label{padding:28px 0 8px}',1)
           p.write_text(s,encoding='utf-8')
           PY
       - name: Commit
@@ -32,5 +36,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Offset homepage anchors below fixed header"
+          git commit -m "Number homepage sections consistently"
           git push
