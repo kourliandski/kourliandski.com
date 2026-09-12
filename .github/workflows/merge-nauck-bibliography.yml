@@ -1,0 +1,66 @@
+name: Merge Nauck bibliography entries
+on:
+  push:
+    paths: ['.github/workflows/merge-nauck-bibliography.yml']
+permissions:
+  contents: write
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Merge German and English entries
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('bibliography.html')
+          s=p.read_text()
+          # Locate the two adjacent 2026 Gisela Nauck entries and preserve their existing URLs.
+          pos1=s.find('Katastrophaler Konstruktivismus')
+          pos2=s.find('Catastrophic Constructivism', pos1+1)
+          if pos1<0 or pos2<0: raise SystemExit('Nauck entries not found')
+          # Entries are article/item blocks; identify nearest common repeated container boundaries.
+          starts=[]
+          for marker in ['<article','<div class="entry','<div class="item','<li']:
+              a=s.rfind(marker,0,pos1); b=s.rfind(marker,0,pos2)
+              if a>=0 and b>a: starts.append((a,b,marker))
+          if not starts: raise SystemExit('Entry containers not found')
+          a,b,marker=max(starts,key=lambda x:x[0])
+          tag='article' if marker=='<article' else ('li' if marker=='<li' else 'div')
+          def end_block(start):
+              # adequate here because bibliography entry containers are not nested with same semantic article/li; for div use next sibling start.
+              if tag in ('article','li'):
+                  e=s.find(f'</{tag}>',start)
+                  return e+len(f'</{tag}>')
+              # for div-based entries use next entry start after current
+              nxt=s.find(marker,start+len(marker))
+              return nxt if nxt>=0 else s.find('</main>',start)
+          end2=end_block(b)
+          block1=s[a:b]
+          block2=s[b:end2]
+          urls1=re.findall(r'href=["\']([^"\']+)["\']',block1)
+          urls2=re.findall(r'href=["\']([^"\']+)["\']',block2)
+          if not urls1 or not urls2: raise SystemExit('Language links not found')
+          de=urls1[-1]; en=urls2[-1]
+          merged=block1
+          # Make title bilingual but compact; retain German title as primary.
+          # Replace the existing action-link area with two language links.
+          links=f'<a href="{de}" target="_blank" rel="noopener">Deutsch ↗</a>&nbsp;&nbsp;&nbsp;<a href="{en}" target="_blank" rel="noopener">English ↗</a>'
+          anchors=list(re.finditer(r'<a\b[^>]*>.*?</a>',merged,re.S|re.I))
+          if not anchors: raise SystemExit('German action link not found')
+          last=anchors[-1]
+          merged=merged[:last.start()]+links+merged[last.end():]
+          # Remove redundant portrait wording if present; keep publication information.
+          merged=merged.replace(' · portrait of Dmitri Kourliandski','')
+          s=s[:a]+merged+s[end2:]
+          p.write_text(s)
+          Path('.github/workflows/merge-nauck-bibliography.yml').unlink()
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Merge Nauck German and English bibliography entries"
+          git push
