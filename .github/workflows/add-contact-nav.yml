@@ -1,4 +1,4 @@
-name: Add contact navigation
+name: Final site cleanup
 
 on:
   push:
@@ -9,30 +9,40 @@ permissions:
   contents: write
 
 jobs:
-  update-navigation:
+  cleanup:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Add contact link
+      - name: Apply requested fixes
         run: |
           python - <<'PY'
           from pathlib import Path
-          files = ['works.html', 'releases.html', 'bibliography.html', 'thoughts.html']
-          radio = '    <a href="https://www.kourliandski.com/radio-espaces-bruts" target="_blank" rel="noopener">radio</a>'
-          contact = '    <a href="index.html#contact">contact</a>'
-          for name in files:
-              p = Path(name)
-              s = p.read_text()
-              if contact not in s:
-                  if radio not in s:
-                      raise SystemExit(f'Navigation marker not found in {name}')
-                  s = s.replace(radio, radio + '\n' + contact, 1)
-                  p.write_text(s)
+
+          # 1. Remove duplicated mobile CSS block and extra closing brace on index.html
+          p = Path('index.html')
+          s = p.read_text()
+          bad = '''}\n  .bio{\n    grid-template-columns:1fr;\n    gap:26px;\n    padding:9vh 18px;\n  }\n  .facts{margin-top:24px}\n  .links{padding:0 18px}\n  .link-row{\n    grid-template-columns:36px 1fr auto;\n    gap:14px;\n    min-height:96px;\n  }\n  .contact{padding:10vh 18px 26px}\n  footer{padding:14px 18px}\n}\n\n.full-bio-link'''
+          good = '''}\n\n.full-bio-link'''
+          if bad not in s:
+              raise SystemExit('Expected duplicated CSS block not found in index.html')
+          p.write_text(s.replace(bad, good, 1))
+
+          # 3. Fix Biography bio navigation link
+          p = Path('biography.html')
+          s = p.read_text()
+          old = '    <a href="#bio">bio</a>'
+          new = '    <a href="index.html#bio">bio</a>'
+          if old not in s:
+              raise SystemExit('Expected bio link not found in biography.html')
+          p.write_text(s.replace(old, new, 1))
+
+          # 5. Remove this one-time workflow
+          Path('.github/workflows/add-contact-nav.yml').unlink()
           PY
-      - name: Commit changes
+      - name: Commit fixes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add works.html releases.html bibliography.html thoughts.html
-          git diff --cached --quiet || git commit -m "Add contact link to site navigation"
+          git add -A
+          git commit -m "Fix site CSS and navigation cleanup"
           git push
