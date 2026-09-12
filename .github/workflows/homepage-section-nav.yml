@@ -1,4 +1,4 @@
-name: Homepage mobile navigation
+name: Homepage anchor offset
 
 on:
   push:
@@ -13,14 +13,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fix mobile navigation
+      - name: Fix anchor offset
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          s=s.replace('  nav a:nth-child(2),\n  nav a:nth-child(3),\n  nav a:nth-child(4){display:none}\n','')
-          s=s.replace('@media(max-width:700px){.current-projects','@media(max-width:700px){header{justify-content:center}.brand{display:none}nav{width:100%;justify-content:space-between;gap:7px;font-size:9px}}\n@media(max-width:700px){.current-projects',1)
+          desktop='#bio,#current-projects,#archive,#contact{scroll-margin-top:58px}\n'
+          mobile='  #bio,#current-projects,#archive,#contact{scroll-margin-top:54px}\n'
+          if desktop not in s:
+              s=s.replace('html{scroll-behavior:smooth}\n','html{scroll-behavior:smooth}\n'+desktop,1)
+          if mobile not in s:
+              s=s.replace('@media(max-width:900px){\n','@media(max-width:900px){\n'+mobile,1)
           p.write_text(s,encoding='utf-8')
           PY
       - name: Commit
@@ -28,5 +32,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Show all homepage navigation on mobile"
+          git commit -m "Offset homepage anchors below fixed header"
           git push
