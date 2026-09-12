@@ -211,6 +211,15 @@ h1 span{
   line-height:.94;
   letter-spacing:-.06em;
 }
+
+.contact-form{max-width:760px;width:100%;margin:6vh 0 7vh}
+.contact-form input,.contact-form textarea{display:block;width:100%;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;color:var(--ink);font:inherit;font-size:18px;padding:16px 0;outline:none}
+.contact-form textarea{min-height:140px;resize:vertical}
+.contact-form input:focus,.contact-form textarea:focus{border-bottom-color:var(--ink)}
+.contact-form button{margin-top:24px;border:1px solid var(--ink);background:transparent;color:var(--ink);font:inherit;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:12px 18px;cursor:pointer}
+.contact-form button:hover{background:var(--ink);color:var(--bg)}
+.contact-email{font-size:12px;letter-spacing:.06em;margin-top:18px}
+
 .contact-bottom{
   display:flex;
   justify-content:space-between;
@@ -403,10 +412,17 @@ footer{
 
   <section class="contact" id="contact">
     <div class="section-no">04 / contact</div>
-    
+
+    <form class="contact-form" action="https://formspree.io/f/xzebqlpw" method="POST">
+      <input type="text" name="name" placeholder="Name" autocomplete="name">
+      <input type="email" name="email" placeholder="Email" autocomplete="email" required>
+      <textarea name="message" placeholder="Message" required></textarea>
+      <button type="submit">Send</button>
+      <div class="contact-email">kourliandski @ gmail . com</div>
+    </form>
+
     <div class="contact-bottom">
       <div>
-        <a class="email" href="mailto:kourliandski@gmail.com">kourliandski@gmail.com ↗</a>
         <div class="socials">
           <a href="https://www.facebook.com/kourliandski/" target="_blank" rel="noopener">facebook ↗</a>
           <a href="https://www.instagram.com/dmitrikourliandski/" target="_blank" rel="noopener">instagram ↗</a>
