@@ -2,50 +2,24 @@ name: Homepage section navigation
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 permissions:
   contents: write
 
 jobs:
-  update:
-    if: github.actor != 'github-actions[bot]'
+  update-homepage:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Update homepage navigation
+      - name: Update navigation
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('index.html')
-          s = p.read_text(encoding='utf-8')
-          old = '''  <nav>
-    <a href="#bio">bio</a>
-    <a href="works.html">works</a>
-    <a href="releases.html">releases</a>
-    <a href="bibliography.html">texts</a>
-    <a href="thoughts.html">thoughts</a>
-    <a href="https://www.kourliandski.com/radio-espaces-bruts" target="_blank" rel="noopener">radio</a>
-    <a href="#contact">contact</a>
-  </nav>'''
-          new = '''  <nav>
-    <a href="#bio">bio</a>
-    <a href="#current-projects">projects</a>
-    <a href="#archive">archive</a>
-    <a href="#contact">contact</a>
-    <a href="https://www.kourliandski.com/radio-espaces-bruts" target="_blank" rel="noopener">radio</a>
-  </nav>'''
-          if old not in s:
-              raise SystemExit('Expected homepage nav not found')
-          s = s.replace(old, new, 1)
-          s = s.replace('<section class="links" aria-label="Site sections">', '<section class="links" id="archive" aria-label="Site sections">', 1)
-          p.write_text(s, encoding='utf-8')
-          PY
-      - name: Commit and remove workflow
+          python3 -c "from pathlib import Path; p=Path('index.html'); s=p.read_text(); a=s.index('  <nav>'); b=s.index('  </nav>',a)+len('  </nav>'); n='  <nav>\n    <a href=\"#bio\">bio</a>\n    <a href=\"#current-projects\">projects</a>\n    <a href=\"#archive\">archive</a>\n    <a href=\"#contact\">contact</a>\n    <a href=\"https://www.kourliandski.com/radio-espaces-bruts\" target=\"_blank\" rel=\"noopener\">radio</a>\n  </nav>'; s=s[:a]+n+s[b:]; s=s.replace('<section class=\"links\" aria-label=\"Site sections\">','<section class=\"links\" id=\"archive\" aria-label=\"Site sections\">',1); p.write_text(s)"
+      - name: Commit
         run: |
-          rm .github/workflows/homepage-section-nav.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "Use section navigation on homepage" || exit 0
+          git add index.html
+          git commit -m "Use section navigation on homepage"
           git push
