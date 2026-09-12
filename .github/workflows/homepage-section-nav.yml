@@ -1,0 +1,51 @@
+name: Homepage section navigation
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update homepage navigation
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = '''  <nav>
+    <a href="#bio">bio</a>
+    <a href="works.html">works</a>
+    <a href="releases.html">releases</a>
+    <a href="bibliography.html">texts</a>
+    <a href="thoughts.html">thoughts</a>
+    <a href="https://www.kourliandski.com/radio-espaces-bruts" target="_blank" rel="noopener">radio</a>
+    <a href="#contact">contact</a>
+  </nav>'''
+          new = '''  <nav>
+    <a href="#bio">bio</a>
+    <a href="#current-projects">projects</a>
+    <a href="#archive">archive</a>
+    <a href="#contact">contact</a>
+    <a href="https://www.kourliandski.com/radio-espaces-bruts" target="_blank" rel="noopener">radio</a>
+  </nav>'''
+          if old not in s:
+              raise SystemExit('Expected homepage nav not found')
+          s = s.replace(old, new, 1)
+          s = s.replace('<section class="links" aria-label="Site sections">', '<section class="links" id="archive" aria-label="Site sections">', 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit and remove workflow
+        run: |
+          rm .github/workflows/homepage-section-nav.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Use section navigation on homepage" || exit 0
+          git push
