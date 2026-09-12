@@ -1,0 +1,38 @@
+name: Add contact navigation
+
+on:
+  push:
+    paths:
+      - '.github/workflows/add-contact-nav.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-navigation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add contact link
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          files = ['works.html', 'releases.html', 'bibliography.html', 'thoughts.html']
+          radio = '    <a href="https://www.kourliandski.com/radio-espaces-bruts" target="_blank" rel="noopener">radio</a>'
+          contact = '    <a href="index.html#contact">contact</a>'
+          for name in files:
+              p = Path(name)
+              s = p.read_text()
+              if contact not in s:
+                  if radio not in s:
+                      raise SystemExit(f'Navigation marker not found in {name}')
+                  s = s.replace(radio, radio + '\n' + contact, 1)
+                  p.write_text(s)
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add works.html releases.html bibliography.html thoughts.html
+          git diff --cached --quiet || git commit -m "Add contact link to site navigation"
+          git push
