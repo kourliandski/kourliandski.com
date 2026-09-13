@@ -119,10 +119,10 @@ function card(r,i){
  if(r.source_url) buttons+=`<a href="${r.source_url}" target="_blank" rel="noopener">${esc(r.source_label||'Donemus')}</a>`;
  buttons+=`<a class="${r.youtube_direct?'':'search'}" href="${r.youtube}" target="_blank" rel="noopener">${r.youtube_direct?'YouTube':'YouTube ⌕'}</a>`;
  const cover = r.cover_url
-   ? `<img src="${r.cover_url}" alt="${esc(r.title)} cover" loading="lazy" referrerpolicy="no-referrer">`
+   ? `<div class="fallback">${esc(r.title)}</div><img src="${r.cover_url}" alt="${esc(r.title)} cover" loading="lazy" referrerpolicy="no-referrer" onload="this.parentElement.classList.add('loaded')" onerror="this.remove()">`
    : `<div class="fallback">${esc(r.title)}</div>`;
  return `<article class="card">
-   <a class="cover loaded" id="cover-${i}" href="${mainLink}" target="_blank" rel="noopener">${cover}</a>
+   <a class="cover" id="cover-${i}" href="${mainLink}" target="_blank" rel="noopener">${cover}</a>
    <div class="info">
      <div class="title">${esc(r.title)}</div>
      <div class="by">${esc([r.artist,r.year].filter(Boolean).join(' · '))}</div>
