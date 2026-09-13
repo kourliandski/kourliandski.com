@@ -1,0 +1,43 @@
+name: Add release tags and Donemus covers
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update releases page
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('releases.html')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('header p{margin:16px 0 0;color:var(--muted)}','header p{margin:16px 0 0;color:var(--muted)}\nheader p a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:2px}\nheader p a:hover{color:var(--ink);border-bottom-color:var(--ink)}')
+          s=s.replace('<p>Bandcamp / FANCYMUSIC / Donemus Records / col legno</p>','<p><a href="#bandcamp">Bandcamp</a> / <a href="#fancymusic">FANCYMUSIC</a> / <a href="#donemus-records">Donemus Records</a> / <a href="#col-legno">col legno</a></p>')
+          old=""" const sec=document.createElement('section');
+ sec.innerHTML=`<h2>${esc(g)}</h2><div class=\"grid\">${rows.map(r=>card(r,idx++)).join('')}</div>`;"""
+          new=""" const sec=document.createElement('section');
+ const sectionIds={\"Dmitri Kourliandski 2.0 — Bandcamp\":\"bandcamp\",\"FANCYMUSIC\":\"fancymusic\",\"Donemus Records\":\"donemus-records\",\"col legno\":\"col-legno\"};
+ sec.id=sectionIds[g]||'';
+ sec.style.scrollMarginTop='58px';
+ sec.innerHTML=`<h2>${esc(g)}</h2><div class=\"grid\">${rows.map(r=>card(r,idx++)).join('')}</div>`;"""
+          if old not in s: raise SystemExit('section render block not found')
+          s=s.replace(old,new,1)
+          s=s.replace('https://api.microlink.io/?url=https%3A%2F%2Fmusic.apple.com%2Fus%2Falbum%2Fsymmetrical-matrix%2F1536897116&embed=image.url','https://api.microlink.io/?url=https%3A%2F%2Fclassical.music.apple.com%2Fca%2Falbum%2F1536897116&embed=image.url')
+          s=s.replace('https://api.microlink.io/?url=https%3A%2F%2Fmusic.apple.com%2Fus%2Falbum%2Fob-version-single%2F1604611328&embed=image.url','https://api.microlink.io/?url=https%3A%2F%2Fclassical.music.apple.com%2Fus%2Falbum%2F1604611328&embed=image.url')
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add releases.html
+          git commit -m "Add active release tags and Donemus covers"
+          git push
