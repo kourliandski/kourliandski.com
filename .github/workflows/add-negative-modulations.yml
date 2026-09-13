@@ -1,4 +1,4 @@
-name: Add Negative Modulations release
+name: Maintain releases page
 on:
   push:
     branches: [main]
@@ -10,26 +10,53 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Restore releases and add col legno release
+      - name: Keep releases page complete
         run: |
-          git show 0671b6c816040338fb885ba144139c5706be2681:releases.html > releases.html
           python3 - <<'PY'
           from pathlib import Path
+          import json, re
           p=Path('releases.html')
           s=p.read_text(encoding='utf-8')
-          s=s.replace('Bandcamp / FANCYMUSIC / Donemus Records','Bandcamp / FANCYMUSIC / Donemus Records / col legno')
-          marker='const releases = ['
-          item='{"group": "col legno", "title": "Negative Modulations", "artist": "Dmitri Kourliandski", "source_url": "https://www.col-legno.com/en/shop/20426-dmitri-kourliandski-negative-modulations", "source_label": "col legno", "youtube": "https://www.youtube.com/results?search_query=Dmitri+Kourliandski+%22Negative+Modulations%22", "youtube_direct": false, "cover": "col-legno", "cover_url": "https://api.microlink.io/?url=https%3A%2F%2Fwww.col-legno.com%2Fen%2Fshop%2F20426-dmitri-kourliandski-negative-modulations&embed=image.url"}, '
-          s=s.replace(marker,marker+item,1)
-          s=s.replace('const groups=["Dmitri Kourliandski 2.0 — Bandcamp","FANCYMUSIC","Donemus Records"];','const groups=["Dmitri Kourliandski 2.0 — Bandcamp","FANCYMUSIC","Donemus Records","col legno"];')
+          m=re.search(r'const releases = (\[.*?\]);\s*const groups=', s, re.S)
+          if not m:
+              raise SystemExit('release array not found')
+          releases=json.loads(m.group(1))
+          wanted=[
+            {"group":"col legno","title":"Negative Modulations","artist":"Dmitri Kourliandski","source_url":"https://www.col-legno.com/en/shop/20426-dmitri-kourliandski-negative-modulations","source_label":"col legno","youtube":"https://www.youtube.com/results?search_query=Dmitri+Kourliandski+%22Negative+Modulations%22","youtube_direct":False,"cover":"col-legno","cover_url":"https://api.microlink.io/?url=https%3A%2F%2Fwww.col-legno.com%2Fen%2Fshop%2F20426-dmitri-kourliandski-negative-modulations&embed=image.url"},
+            {"group":"Compilations","title":"Fermata. Compiled by Alexey Munipov","year":"2019","artist":"Various Artists · includes Dmitri Kourliandski — The Anatomy of Pain","source_url":"https://fancymusic.bandcamp.com/album/fermata-compiled-by-alexey-munipov","source_label":"Bandcamp","youtube":"https://www.youtube.com/results?search_query=Dmitri+Kourliandski+%22The+Anatomy+of+Pain%22","youtube_direct":False,"cover":"bandcamp","cover_url":"https://api.microlink.io/?url=https%3A%2F%2Ffancymusic.bandcamp.com%2Falbum%2Ffermata-compiled-by-alexey-munipov&embed=image.url"},
+            {"group":"Compilations","title":"Sorokin Trip","year":"2019","artist":"Various Artists · includes Dmitri Kourliandski — Shiver","source_url":"https://www.qobuz.com/us-en/album/sorokin-trip-various-artists/tsz8mwlpbasrc","source_label":"Qobuz","youtube":"https://www.youtube.com/results?search_query=Dmitri+Kourliandski+Shiver+Sergej+Tchirkov","youtube_direct":False,"cover":"external","cover_url":"https://api.microlink.io/?url=https%3A%2F%2Fwww.qobuz.com%2Fus-en%2Falbum%2Fsorokin-trip-various-artists%2Ftsz8mwlpbasrc&embed=image.url"},
+            {"group":"Compilations","title":"Selected Works Of EMA Expo","year":"2017","artist":"Various Artists · includes Dmitri Kourliandski + Andrey Guryanov (KGXXX)","source_url":"https://kotae.bandcamp.com/album/selected-works-of-ema-expo","source_label":"Bandcamp","youtube":"https://www.youtube.com/results?search_query=Dmitri+Kourliandski+Andrey+Guryanov+KGXXX+EMA+Expo","youtube_direct":False,"cover":"bandcamp","cover_url":"https://api.microlink.io/?url=https%3A%2F%2Fkotae.bandcamp.com%2Falbum%2Fselected-works-of-ema-expo&embed=image.url"},
+            {"group":"Compilations","title":"Schrift","year":"2017","artist":"Fanny Vicens · includes Dmitri Kourliandski — Shiver","source_url":"https://classical.music.apple.com/ua/album/1187451519","source_label":"Apple Music","youtube":"https://www.youtube.com/results?search_query=Dmitri+Kourliandski+Fanny+Vicens+Shiver","youtube_direct":False,"cover":"external","cover_url":"https://image.thum.io/get/width/900/crop/900/noanimate/https://classical.music.apple.com/ua/album/1187451519"},
+            {"group":"Compilations","title":"Пифийские игры 2002–2005. Избранное","year":"2006","artist":"Various Artists · includes Dmitri Kourliandski — Four States of Same","source_url":"https://melody.su/catalog/classic/438/","source_label":"Melodiya","youtube":"https://www.youtube.com/results?search_query=Dmitri+Kourliandski+Four+States+of+Same+Pythian+Games","youtube_direct":False,"cover":"external","cover_url":"https://api.microlink.io/?url=https%3A%2F%2Fmelody.su%2Fcatalog%2Fclassic%2F438%2F&embed=image.url"}
+          ]
+          keys={(r.get('group'),r.get('title')) for r in releases}
+          for item in wanted:
+              if (item['group'],item['title']) not in keys:
+                  releases.append(item)
+          # Put col legno first and compilations last, preserving existing entries otherwise.
+          order=['col legno','Dmitri Kourliandski 2.0 — Bandcamp','FANCYMUSIC','Donemus Records','Compilations']
+          releases.sort(key=lambda r:(order.index(r.get('group')) if r.get('group') in order else 99, -(int(r.get('year') or 0)) if r.get('group')=='Compilations' else 0))
+          arr=json.dumps(releases,ensure_ascii=False,separators=(',',':'))
+          s=s[:m.start(1)]+arr+s[m.end(1):]
+          s=re.sub(r'const groups=\[.*?\];','const groups=["col legno","Dmitri Kourliandski 2.0 — Bandcamp","FANCYMUSIC","Donemus Records","Compilations"];',s,count=1)
+          s=re.sub(r'\n?<p>Bandcamp / FANCYMUSIC / Donemus Records(?: / col legno)?</p>','',s,count=1)
+          if '.filters{' not in s:
+              s=s.replace('</style>','''\n.filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 30px}.filter-tag{appearance:none;border:1px solid var(--line);background:transparent;color:var(--ink);padding:7px 11px;border-radius:999px;font:inherit;font-size:12px;cursor:pointer}.filter-tag:hover{border-color:#111}.filter-tag.active{background:#111;color:#fff;border-color:#111}section.hidden{display:none}\n</style>''',1)
+          s=s.replace('<main id="main"></main>','<main id="main"><div class="filters" id="filters" aria-label="Release filters"></div></main>')
+          old="""const main=document.getElementById('main');\nlet idx=0;\ngroups.forEach(g=>{\n const rows=releases.filter(r=>r.group===g);\n const sec=document.createElement('section');\n sec.innerHTML=`<h2>${esc(g)}</h2><div class=\"grid\">${rows.map(r=>card(r,idx++)).join('')}</div>`;\n main.appendChild(sec);\n});"""
+          new="""const main=document.getElementById('main');\nconst filters=document.getElementById('filters');\nlet idx=0;\nconst sections=new Map();\nfunction showGroup(group){\n document.querySelectorAll('.filter-tag').forEach(btn=>btn.classList.toggle('active',btn.dataset.group===group));\n sections.forEach((sec,g)=>sec.classList.toggle('hidden',group!=='All'&&g!==group));\n}\n['All',...groups].forEach(g=>{\n const btn=document.createElement('button');\n btn.type='button'; btn.className='filter-tag'+(g==='All'?' active':''); btn.dataset.group=g;\n btn.textContent=g==='Dmitri Kourliandski 2.0 — Bandcamp'?'Bandcamp / 2.0':g;\n btn.addEventListener('click',()=>showGroup(g)); filters.appendChild(btn);\n});\ngroups.forEach(g=>{\n const rows=releases.filter(r=>r.group===g);\n const sec=document.createElement('section'); sec.dataset.group=g;\n sec.innerHTML=`<h2>${esc(g)}</h2><div class=\"grid\">${rows.map(r=>card(r,idx++)).join('')}</div>`;\n sections.set(g,sec); main.appendChild(sec);\n});"""
+          if old in s:
+              s=s.replace(old,new)
+          # Ensure failed covers show the fallback title instead of an empty square.
+          s=s.replace('class="cover loaded" id="cover-${i}"','class="cover" id="cover-${i}"')
+          s=s.replace('loading="lazy" referrerpolicy="no-referrer">','loading="lazy" referrerpolicy="no-referrer" onload="this.parentElement.classList.add(\'loaded\')" onerror="this.style.display=\'none\';this.parentElement.classList.remove(\'loaded\')">')
           p.write_text(s,encoding='utf-8')
           PY
-      - name: Commit
+      - name: Commit changes if needed
         run: |
+          if git diff --quiet -- releases.html; then exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add releases.html
-          git commit -m "Add Negative Modulations release"
+          git commit -m "Maintain complete releases page"
           git push
