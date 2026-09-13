@@ -20,6 +20,13 @@ jobs:
           m=re.search(r'const releases = (\[.*?\]);\s*const groups=',s,re.S)
           if not m: raise SystemExit('release array not found')
           releases=json.loads(m.group(1))
+          # Correct label ownership for the two Kotä Records releases.
+          for r in releases:
+              if r.get('title') in ('Catabasis. Dämonen. Material.','Non-Lieux'):
+                  r['group']='Kotä Records'
+                  r['artist']='Dmitri Kourliandski'
+                  r['source_label']='Kotä Records'
+                  r['source_url']='https://kotaerecords.com/releases/dmitri-kourliandski-catabasis-daemonen-material' if r['title'].startswith('Catabasis') else 'https://kotaerecords.com/releases/dmitri-kourliandski-non-lieux'
           wanted=[
             {"group":"col legno","title":"Negative Modulations","artist":"Dmitri Kourliandski","source_url":"https://www.col-legno.com/en/shop/20426-dmitri-kourliandski-negative-modulations","source_label":"col legno","youtube":"https://www.youtube.com/results?search_query=Dmitri+Kourliandski+%22Negative+Modulations%22","youtube_direct":False,"cover":"col-legno","cover_url":"https://api.microlink.io/?url=https%3A%2F%2Fwww.col-legno.com%2Fen%2Fshop%2F20426-dmitri-kourliandski-negative-modulations&embed=image.url"},
             {"group":"Compilations","title":"Sound Review 3/6","year":"2020","artist":"Various Artists · includes Dmitri Kourliandski — Punctuation Marks","source_url":"https://melody.su/en/catalog/classic/48652/","source_label":"Melodiya","youtube":"https://www.youtube.com/results?search_query=Dmitri+Kourliandski+Punctuation+Marks+Sound+Review+3%2F6","youtube_direct":False,"cover":"external","cover_url":"https://api.microlink.io/?url=https%3A%2F%2Fmelody.su%2Fen%2Fcatalog%2Fclassic%2F48652%2F&embed=image.url"},
@@ -33,14 +40,12 @@ jobs:
           for item in wanted:
               key=(item['group'],item['title'])
               if key in bykey: bykey[key].update(item)
-              else:
-                  releases.append(item); bykey[key]=item
-          order=['col legno','Dmitri Kourliandski 2.0 — Bandcamp','FANCYMUSIC','Donemus Records','Compilations']
+              elif not any(r.get('title')==item['title'] for r in releases): releases.append(item)
+          order=['col legno','Dmitri Kourliandski 2.0 — Bandcamp','FANCYMUSIC','Kotä Records','Donemus Records','Compilations']
           releases.sort(key=lambda r:(order.index(r.get('group')) if r.get('group') in order else 99,-int(r.get('year') or 0) if r.get('group')=='Compilations' else 0))
           arr=json.dumps(releases,ensure_ascii=False,separators=(',',':'))
           s=s[:m.start(1)]+arr+s[m.end(1):]
-          s=re.sub(r'const groups=\[.*?\];','const groups=["col legno","Dmitri Kourliandski 2.0 — Bandcamp","FANCYMUSIC","Donemus Records","Compilations"];',s,count=1)
-          s=re.sub(r'\n?<p>Bandcamp / FANCYMUSIC / Donemus Records(?: / col legno)?(?: / compilations)?</p>','',s,count=1)
+          s=re.sub(r'const groups=\[.*?\];','const groups=["col legno","Dmitri Kourliandski 2.0 — Bandcamp","FANCYMUSIC","Kotä Records","Donemus Records","Compilations"];',s,count=1)
           p.write_text(s,encoding='utf-8')
           PY
       - name: Commit changes if needed
