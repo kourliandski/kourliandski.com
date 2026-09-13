@@ -1,3 +1,4 @@
+# deploy trigger 2026-09-13
 name: Make Thoughts game
 on:
   push:
@@ -50,75 +51,22 @@ body{overflow:hidden!important;cursor:pointer}
   let order=[],pos=0,current=intro;
   const count=document.getElementById('count');
   const counter=count?.parentElement;
-  const oldTotal=counter?.textContent.match(/\/\s*(\d+)/)?.[1];
   const total=deck.length;
   if(counter)counter.innerHTML='<span id="count">00</span> / '+String(total).padStart(2,'0');
   const liveCount=document.getElementById('count');
-
   const hint=document.createElement('div');
-  hint.id='game-hint';
-  hint.textContent='tap / click anywhere to draw';
-  document.body.appendChild(hint);
-
+  hint.id='game-hint'; hint.textContent='tap / click anywhere to draw'; document.body.appendChild(hint);
   const end=document.createElement('div');
-  end.id='game-end';
-  end.innerHTML='<div><div class="end-title">END</div><button type="button" id="reshuffle">reshuffle</button></div>';
-  document.body.appendChild(end);
-
+  end.id='game-end'; end.innerHTML='<div><div class="end-title">END</div><button type="button" id="reshuffle">reshuffle</button></div>'; document.body.appendChild(end);
   const introText=intro.querySelector('.text-wrap');
-  if(introText){
-    const expl=document.createElement('p');
-    expl.innerHTML='<br><strong>how to read:</strong> tap or click anywhere on the screen to draw a page. the pages appear in a random order and never repeat until the deck is exhausted. <em>Intro</em> is part of the deck.';
-    introText.appendChild(expl);
-  }
-  const introGhost=intro.querySelector('.ghost-number'); if(introGhost)introGhost.textContent='00';
-  const introRail=intro.querySelector('.rail-label'); if(introRail)introRail.textContent='00';
-
-  function shuffle(){
-    order=[...deck];
-    for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
-    pos=0;
-  }
-  function show(el){
-    all.forEach(x=>x.classList.remove('game-visible'));
-    el.classList.add('game-visible');
-    el.scrollTop=0;
-    current=el;
-    const label=el.dataset.label||'—';
-    if(liveCount)liveCount.textContent=label;
-  }
-  function next(){
-    if(pos>=order.length){
-      all.forEach(x=>x.classList.remove('game-visible'));
-      end.classList.add('show');
-      hint.textContent='deck complete';
-      return;
-    }
-    show(order[pos++]);
-    hint.textContent=pos===order.length?'tap / click once more to finish':'tap / click anywhere to draw';
-  }
-  function restart(ev){
-    ev?.stopPropagation();
-    end.classList.remove('show');
-    shuffle();
-    show(intro);
-    hint.textContent='tap / click anywhere to draw';
-  }
-
-  shuffle();
-  show(intro);
-  document.addEventListener('click',e=>{
-    if(e.target.closest('.global-site-nav'))return;
-    if(e.target.closest('#reshuffle'))return restart(e);
-    if(end.classList.contains('show'))return;
-    next();
-  });
-  document.addEventListener('keydown',e=>{
-    if(e.key===' '||e.key==='Enter'||e.key==='ArrowRight'){
-      if(end.classList.contains('show'))return;
-      e.preventDefault();next();
-    }
-  });
+  if(introText){const expl=document.createElement('p');expl.innerHTML='<br><strong>how to read:</strong> tap or click anywhere on the screen to draw a page. the pages appear in a random order and never repeat until the deck is exhausted. <em>Intro</em> is part of the deck.';introText.appendChild(expl);}
+  function shuffle(){order=[...deck];for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}pos=0;}
+  function show(el){all.forEach(x=>x.classList.remove('game-visible'));el.classList.add('game-visible');el.scrollTop=0;current=el;if(liveCount)liveCount.textContent=el.dataset.label||'—';}
+  function next(){if(pos>=order.length){all.forEach(x=>x.classList.remove('game-visible'));end.classList.add('show');hint.textContent='deck complete';return;}show(order[pos++]);hint.textContent=pos===order.length?'tap / click once more to finish':'tap / click anywhere to draw';}
+  function restart(ev){ev?.stopPropagation();end.classList.remove('show');shuffle();show(intro);hint.textContent='tap / click anywhere to draw';}
+  shuffle();show(intro);
+  document.addEventListener('click',e=>{if(e.target.closest('.global-site-nav'))return;if(e.target.closest('#reshuffle'))return restart(e);if(end.classList.contains('show'))return;next();});
+  document.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'||e.key==='ArrowRight'){if(end.classList.contains('show'))return;e.preventDefault();next();}});
 })();
 </script>
 '''
