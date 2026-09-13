@@ -21,9 +21,10 @@ main{position:fixed;inset:var(--sitebar-h) 0 0 0;cursor:pointer}
 .text{width:min(900px,92%);position:relative;z-index:2}.text p{margin:0 0 1em;font-size:clamp(21px,2.25vw,34px);line-height:1.44;letter-spacing:-.018em}.text p:last-child{margin-bottom:0}.text.short p{font-size:clamp(30px,4vw,60px);line-height:1.2}.diary-title{margin:0 0 1.15em;font-size:clamp(38px,6vw,88px);line-height:.96;letter-spacing:-.055em;font-weight:700}.diary-title span{display:block;margin-top:.28em;font-size:.36em;line-height:1.1;letter-spacing:.08em;text-transform:uppercase;font-weight:400;color:var(--muted)}
 .counter{position:fixed;right:20px;top:calc(var(--sitebar-h) + 18px);z-index:30;font-size:11px;letter-spacing:.12em;color:var(--muted)}
 .hint{position:fixed;left:5vw;bottom:22px;z-index:30;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);pointer-events:none}
+.download-pdf{position:fixed;right:20px;bottom:22px;z-index:40;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none}.download-pdf:hover{color:var(--ink)}
 .loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
 .end{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center}.end.show{display:flex}.end-title{font-size:clamp(70px,15vw,190px);line-height:.8;font-weight:700;letter-spacing:-.08em}.end button{margin-top:32px;border:1px solid rgba(0,0,0,.24);background:transparent;padding:11px 18px;font:inherit;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
-@media(max-width:760px){:root{--sitebar-h:44px}.global-site-nav{padding:0 16px;gap:12px}.nav-right{gap:11px}.nav-right a:nth-child(3),.nav-right a:nth-child(4){display:none}.card{grid-template-columns:38px 1fr;padding:7vh 20px 58px 16px}.text{width:100%}.text p{font-size:clamp(17px,4.5vw,19px);line-height:1.5}.ghost{font-size:52vw;bottom:-.08em}.hint{left:16px;bottom:14px}.diary-title{font-size:clamp(34px,11vw,54px)}}
+@media(max-width:760px){:root{--sitebar-h:44px}.global-site-nav{padding:0 16px;gap:12px}.nav-right{gap:11px}.nav-right a:nth-child(3),.nav-right a:nth-child(4){display:none}.card{grid-template-columns:38px 1fr;padding:7vh 20px 58px 16px}.text{width:100%}.text p{font-size:clamp(17px,4.5vw,19px);line-height:1.5}.ghost{font-size:52vw;bottom:-.08em}.hint{left:16px;bottom:14px}.download-pdf{right:16px;bottom:14px}.diary-title{font-size:clamp(34px,11vw,54px)}}
 </style>
 </head>
 <body>
@@ -31,6 +32,7 @@ main{position:fixed;inset:var(--sitebar-h) 0 0 0;cursor:pointer}
 <div class="counter"><span id="count">00</span> / <span id="total">—</span></div>
 <main id="game"><div class="loading" id="loading">loading thoughts…</div><div class="end" id="end"><div><div class="end-title">END</div><button id="reshuffle" type="button">reshuffle</button></div></div></main>
 <div class="hint" id="hint">tap / click anywhere to draw</div>
+<a class="download-pdf" href="thoughts-and-quotes-2026-09-13-1.pdf" download>download current PDF</a>
 <script>
 const SOURCE='https://api.github.com/repos/kourliandski/kourliandski.com/git/blobs/1b9231d4bbb24a7ce63c44624428e274f5ebd94f';
 const NEW_CARDS=[
@@ -56,7 +58,7 @@ function render(card,isZero=false){end.classList.remove('show');game.querySelect
 function next(){if(!ready)return;if(pos>=order.length){game.querySelector('.card')?.remove();end.classList.add('show');hint.textContent='deck complete';return}render(order[pos++]);hint.textContent=pos===order.length?'tap / click once more to finish':'tap / click anywhere to draw'}
 function restart(e){e?.stopPropagation();shuffle();render(introCard,true);hint.textContent='tap / click anywhere to draw'}
 fetch(SOURCE,{headers:{'Accept':'application/vnd.github+json'}}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(data=>{const doc=new DOMParser().parseFromString(decodeBase64(data.content),'text/html');const cards=renumber([...doc.querySelectorAll('.text-panel')].map(extractCard));introCard=cards.find(c=>c.label==='00');deck=[...cards.filter(c=>c.label!=='00'),...NEW_CARDS];total.textContent=String(deck.length).padStart(2,'0');shuffle();loading.remove();render(introCard,true);ready=true}).catch(()=>{loading.textContent='could not load thoughts';hint.textContent='please reload'});
-document.addEventListener('click',e=>{if(e.target.closest('.global-site-nav'))return;if(e.target.closest('#reshuffle'))return restart(e);if(end.classList.contains('show'))return;next()});
+document.addEventListener('click',e=>{if(e.target.closest('.global-site-nav'))return;if(e.target.closest('.download-pdf'))return;if(e.target.closest('#reshuffle'))return restart(e);if(end.classList.contains('show'))return;next()});
 document.addEventListener('keydown',e=>{if([' ','Enter','ArrowRight'].includes(e.key)){if(end.classList.contains('show'))return;e.preventDefault();next()}});
 </script>
 </body>
