@@ -1,0 +1,135 @@
+name: Make Thoughts game
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  update:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Transform thoughts page into non-repeating random deck
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('thoughts.html')
+          s=p.read_text(encoding='utf-8')
+          if 'id="thoughts-game-css"' in s:
+              raise SystemExit(0)
+          css=r'''
+<style id="thoughts-game-css">
+html{scroll-snap-type:none!important;scroll-behavior:auto!important;overflow:hidden}
+body{overflow:hidden!important;cursor:pointer}
+.cover{display:none!important}
+.panel{display:none!important;border-bottom:0!important;min-height:calc(100svh - var(--sitebar-h))!important}
+.panel.game-visible{display:grid!important}
+#s1.game-visible{display:grid!important}
+.topbar,.nav{display:none!important}
+.counter{top:calc(var(--sitebar-h) + 18px);background:transparent!important;backdrop-filter:none!important}
+.text-panel{height:calc(100svh - var(--sitebar-h));overflow:auto!important;padding-top:7vh;padding-bottom:7vh}
+#game-hint{position:fixed;left:5vw;bottom:22px;z-index:30;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);pointer-events:none}
+#game-end{display:none;position:fixed;inset:var(--sitebar-h) 0 0 0;z-index:25;background:var(--bg);align-items:center;justify-content:center;text-align:center;padding:8vw}
+#game-end.show{display:flex}
+#game-end .end-title{font-size:clamp(64px,14vw,180px);line-height:.8;font-weight:700;letter-spacing:-.075em}
+#game-end button{margin-top:34px;border:1px solid rgba(0,0,0,.25);background:transparent;padding:10px 18px;font:inherit;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.global-site-nav{cursor:default}
+.global-site-nav a{cursor:pointer}
+@media(max-width:720px){#game-hint{left:16px;bottom:14px}.text-panel{height:calc(100svh - var(--sitebar-h));padding-bottom:58px}}
+</style>
+'''
+          s=s.replace('</head>',css+'\n</head>',1)
+          js=r'''
+<script id="thoughts-game-js">
+(()=>{
+  const intro=document.querySelector('#s1');
+  const all=[...document.querySelectorAll('.text-panel')];
+  if(!intro||all.length<2)return;
+  const deck=all.filter(el=>el!==intro);
+  let order=[],pos=0,current=intro;
+  const count=document.getElementById('count');
+  const counter=count?.parentElement;
+  const oldTotal=counter?.textContent.match(/\/\s*(\d+)/)?.[1];
+  const total=deck.length;
+  if(counter)counter.innerHTML='<span id="count">00</span> / '+String(total).padStart(2,'0');
+  const liveCount=document.getElementById('count');
+
+  const hint=document.createElement('div');
+  hint.id='game-hint';
+  hint.textContent='tap / click anywhere to draw';
+  document.body.appendChild(hint);
+
+  const end=document.createElement('div');
+  end.id='game-end';
+  end.innerHTML='<div><div class="end-title">END</div><button type="button" id="reshuffle">reshuffle</button></div>';
+  document.body.appendChild(end);
+
+  const introText=intro.querySelector('.text-wrap');
+  if(introText){
+    const expl=document.createElement('p');
+    expl.innerHTML='<br><strong>how to read:</strong> tap or click anywhere on the screen to draw a page. the pages appear in a random order and never repeat until the deck is exhausted. <em>Intro</em> is part of the deck.';
+    introText.appendChild(expl);
+  }
+  const introGhost=intro.querySelector('.ghost-number'); if(introGhost)introGhost.textContent='00';
+  const introRail=intro.querySelector('.rail-label'); if(introRail)introRail.textContent='00';
+
+  function shuffle(){
+    order=[...deck];
+    for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+    pos=0;
+  }
+  function show(el){
+    all.forEach(x=>x.classList.remove('game-visible'));
+    el.classList.add('game-visible');
+    el.scrollTop=0;
+    current=el;
+    const label=el.dataset.label||'—';
+    if(liveCount)liveCount.textContent=label;
+  }
+  function next(){
+    if(pos>=order.length){
+      all.forEach(x=>x.classList.remove('game-visible'));
+      end.classList.add('show');
+      hint.textContent='deck complete';
+      return;
+    }
+    show(order[pos++]);
+    hint.textContent=pos===order.length?'tap / click once more to finish':'tap / click anywhere to draw';
+  }
+  function restart(ev){
+    ev?.stopPropagation();
+    end.classList.remove('show');
+    shuffle();
+    show(intro);
+    hint.textContent='tap / click anywhere to draw';
+  }
+
+  shuffle();
+  show(intro);
+  document.addEventListener('click',e=>{
+    if(e.target.closest('.global-site-nav'))return;
+    if(e.target.closest('#reshuffle'))return restart(e);
+    if(end.classList.contains('show'))return;
+    next();
+  });
+  document.addEventListener('keydown',e=>{
+    if(e.key===' '||e.key==='Enter'||e.key==='ArrowRight'){
+      if(end.classList.contains('show'))return;
+      e.preventDefault();next();
+    }
+  });
+})();
+</script>
+'''
+          s=s.replace('</body>',js+'\n</body>',1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit
+        run: |
+          if git diff --quiet -- thoughts.html; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add thoughts.html
+          git commit -m "Make Thoughts & Quotes a random deck"
+          git push
