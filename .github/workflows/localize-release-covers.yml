@@ -1,0 +1,74 @@
+name: Localize release cover images
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  localize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download covers and switch to local assets
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,re,subprocess,urllib.parse,unicodedata
+
+          p=Path('releases.html')
+          s=p.read_text(encoding='utf-8')
+          m=re.search(r'const releases = (\[.*?\]);\nconst groups=',s,re.S)
+          if not m:
+              raise SystemExit('releases array not found')
+          releases=json.loads(m.group(1))
+          out=Path('assets/releases')
+          out.mkdir(parents=True,exist_ok=True)
+
+          def slugify(text):
+              t=unicodedata.normalize('NFKD', text).encode('ascii','ignore').decode().lower()
+              t=re.sub(r'[^a-z0-9]+','-',t).strip('-')
+              return t[:80] or 'release'
+
+          changed=0
+          failed=[]
+          for i,r in enumerate(releases):
+              url=r.get('cover_url')
+              if not url or url.startswith('assets/releases/'):
+                  continue
+              base=slugify(f"{r.get('group','')}-{r.get('title','')}")
+              tmp=out/(base+'.img')
+              try:
+                  subprocess.run(['curl','-L','--fail','--retry','3','--connect-timeout','15','--max-time','60','-A','Mozilla/5.0',url,'-o',str(tmp)],check=True)
+                  typ=subprocess.check_output(['file','--brief','--mime-type',str(tmp)],text=True).strip()
+                  ext={
+                    'image/jpeg':'.jpg','image/png':'.png','image/webp':'.webp','image/gif':'.gif'
+                  }.get(typ)
+                  if not ext:
+                      raise RuntimeError(f'not image: {typ}')
+                  dest=out/(base+ext)
+                  if dest.exists(): dest.unlink()
+                  tmp.rename(dest)
+                  r['cover_url']=str(dest).replace('\\','/')
+                  changed+=1
+              except Exception as e:
+                  failed.append((r.get('title'),url,str(e)))
+                  if tmp.exists(): tmp.unlink()
+
+          new_json=json.dumps(releases,ensure_ascii=False,separators=(',',':'))
+          s=s[:m.start(1)]+new_json+s[m.end(1):]
+          p.write_text(s,encoding='utf-8')
+          print(f'localized {changed} covers; failed {len(failed)}')
+          for x in failed: print('FAILED:',*x)
+          PY
+      - name: Commit localized covers and remove workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add releases.html assets/releases
+          git rm .github/workflows/localize-release-covers.yml
+          git commit -m "Store release covers locally"
+          git push
