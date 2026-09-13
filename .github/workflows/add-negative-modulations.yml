@@ -1,0 +1,36 @@
+name: Add Negative Modulations release
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  update:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Restore releases and add col legno release
+        run: |
+          git show HEAD^:releases.html > releases.html
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('releases.html')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('Bandcamp / FANCYMUSIC / Donemus Records','Bandcamp / FANCYMUSIC / Donemus Records / col legno')
+          marker='const releases = ['
+          item='{"group": "col legno", "title": "Negative Modulations", "artist": "Dmitri Kourliandski", "source_url": "https://www.col-legno.com/en/shop/20426-dmitri-kourliandski-negative-modulations", "source_label": "col legno", "youtube": "https://www.youtube.com/results?search_query=Dmitri+Kourliandski+%22Negative+Modulations%22", "youtube_direct": false, "cover": "col-legno", "cover_url": "https://api.microlink.io/?url=https%3A%2F%2Fwww.col-legno.com%2Fen%2Fshop%2F20426-dmitri-kourliandski-negative-modulations&embed=image.url"}, '
+          if '20426-dmitri-kourliandski-negative-modulations' not in s:
+              s=s.replace(marker,marker+item,1)
+          s=s.replace('const groups=["Dmitri Kourliandski 2.0 — Bandcamp","FANCYMUSIC","Donemus Records"];','const groups=["Dmitri Kourliandski 2.0 — Bandcamp","FANCYMUSIC","Donemus Records","col legno"];')
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add releases.html
+          git commit -m "Add Negative Modulations release"
+          git push
