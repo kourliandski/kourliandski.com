@@ -1,0 +1,36 @@
+name: Fix release cover fallbacks
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Make cover loading robust
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('releases.html')
+          s=p.read_text(encoding='utf-8')
+          old=''' const cover = r.cover_url\n   ? `<img src="${r.cover_url}" alt="${esc(r.title)} cover" loading="lazy" referrerpolicy="no-referrer">`\n   : `<div class="fallback">${esc(r.title)}</div>`;\n return `<article class="card">\n   <a class="cover loaded" id="cover-${i}" href="${mainLink}" target="_blank" rel="noopener">${cover}</a>'''
+          new=''' const cover = r.cover_url\n   ? `<div class="fallback">${esc(r.title)}</div><img src="${r.cover_url}" alt="${esc(r.title)} cover" loading="lazy" referrerpolicy="no-referrer" onload="this.parentElement.classList.add('loaded')" onerror="this.remove()">`\n   : `<div class="fallback">${esc(r.title)}</div>`;\n return `<article class="card">\n   <a class="cover" id="cover-${i}" href="${mainLink}" target="_blank" rel="noopener">${cover}</a>'''
+          if old not in s:
+              raise SystemExit('cover block not found')
+          s=s.replace(old,new,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit and remove workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add releases.html
+          git rm .github/workflows/fix-release-cover-fallback.yml
+          git commit -m "Fix release cover fallbacks"
+          git push
