@@ -1,0 +1,49 @@
+name: Patch root bilingual navigation
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-root-bilingual-nav.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch root internal pages
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          pages=['works.html','releases.html','bibliography.html','thoughts.html']
+          for name in pages:
+              p=Path(name); s=p.read_text(encoding='utf-8')
+              # Route English internal navigation through bilingual wrappers.
+              s=s.replace('href="works.html"','href="/en/works.html"')
+              s=s.replace('href="releases.html"','href="/en/releases.html"')
+              s=s.replace('href="bibliography.html"','href="/en/bibliography.html"')
+              s=s.replace('href="thoughts.html"','href="/en/thoughts.html"')
+              s=s.replace('href="index.html"','href="/"')
+              s=s.replace('href="index.html#contact"','href="/#contact"')
+              # Add FR directly to the actual root header, so direct/bookmarked root URLs also work.
+              if '/fr/'+name not in s:
+                  sw=f'<a class="root-fr-switch" href="/fr/{name}" onclick="localStorage.setItem(\'siteLanguage\',\'fr\')">FR</a>'
+                  marker='<div class="nav-right">'
+                  if marker in s:
+                      start=s.index(marker)+len(marker)
+                      end=s.find('</div>',start)
+                      s=s[:end]+sw+s[end:]
+              # Normalize header typography to the bilingual pages.
+              css='''<style id="bilingual-root-nav">.global-site-nav,.global-site-nav a{font-size:11px!important;letter-spacing:.09em!important}.global-site-nav .nav-right{display:flex!important;align-items:center!important;gap:18px!important}.global-site-nav .root-fr-switch{display:inline-block!important;border-left:1px solid rgba(0,0,0,.2);padding-left:16px;font-weight:700;white-space:nowrap}@media(max-width:760px){.global-site-nav{padding:0 10px!important;gap:6px!important;max-width:100%;overflow:hidden}.global-site-nav>a:first-child{font-size:8px!important;line-height:1.1!important;max-width:none!important;white-space:nowrap!important;flex-shrink:0}.global-site-nav .nav-right{gap:7px!important;margin-left:auto!important;min-width:0}.global-site-nav .nav-right a:nth-child(3),.global-site-nav .nav-right a:nth-child(4){display:none!important}.global-site-nav .nav-right a{font-size:8px!important;letter-spacing:.05em!important}.global-site-nav .root-fr-switch{display:inline-block!important;padding-left:6px!important;font-size:9px!important;letter-spacing:.07em!important}}</style>'''
+              if 'id="bilingual-root-nav"' not in s:
+                  s=s.replace('</head>',css+'</head>')
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add works.html releases.html bibliography.html thoughts.html
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Add bilingual nav to root internal pages"
+          git push
