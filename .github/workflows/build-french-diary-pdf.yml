@@ -23,15 +23,16 @@ jobs:
           import re, html
           from pathlib import Path
           from reportlab.lib.pagesizes import A4
-          from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+          from reportlab.lib.styles import ParagraphStyle
           from reportlab.lib.enums import TA_LEFT
           from reportlab.lib.colors import HexColor
-          from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+          from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak
           from reportlab.pdfbase import pdfmetrics
           from reportlab.pdfbase.ttfonts import TTFont
           font='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
           bold='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
-          pdfmetrics.registerFont(TTFont('DV',font)); pdfmetrics.registerFont(TTFont('DVB',bold))
+          italic='/usr/share/fonts/truetype/dejavu/DejaVuSans-Oblique.ttf'
+          pdfmetrics.registerFont(TTFont('DV',font)); pdfmetrics.registerFont(TTFont('DVB',bold)); pdfmetrics.registerFont(TTFont('DVI',italic))
           cards={}
           for f in sorted(Path('fr').glob('thoughts-fr-*.js')):
               s=f.read_text(encoding='utf-8')
@@ -43,17 +44,19 @@ jobs:
           out='fr/reflexions-et-citations.pdf'
           doc=SimpleDocTemplate(out,pagesize=A4,rightMargin=52,leftMargin=52,topMargin=54,bottomMargin=54,title='Réflexions & citations — Dmitri Kourliandski',author='Dmitri Kourliandski')
           title=ParagraphStyle('title',fontName='DVB',fontSize=30,leading=32,spaceAfter=12,textColor=HexColor('#11110f'))
-          sub=ParagraphStyle('sub',fontName='DV',fontSize=10,leading=14,spaceAfter=28,textColor=HexColor('#777066'))
+          sub=ParagraphStyle('sub',fontName='DV',fontSize=10,leading=14,spaceAfter=10,textColor=HexColor('#777066'))
+          note=ParagraphStyle('note',fontName='DVI',fontSize=9,leading=12,spaceAfter=28,textColor=HexColor('#777066'))
           num=ParagraphStyle('num',fontName='DVB',fontSize=10,leading=12,spaceAfter=12,textColor=HexColor('#777066'))
           body=ParagraphStyle('body',fontName='DV',fontSize=11.5,leading=17,alignment=TA_LEFT,textColor=HexColor('#11110f'))
-          story=[Paragraph('RÉFLEXIONS &amp; CITATIONS',title),Paragraph('Dmitri Kourliandski · 2002—2026 · version française',sub)]
-          for i,k in enumerate(sorted(cards)):
+          story=[Paragraph('RÉFLEXIONS &amp; CITATIONS',title),Paragraph('Dmitri Kourliandski · 2002—2026 · version française',sub),Paragraph('Traduction automatique de l’anglais.',note)]
+          keys=[k for k in sorted(cards) if k!='00']
+          for i,k in enumerate(keys):
               story += [Paragraph(k,num),Paragraph(clean(cards[k]),body)]
-              if i < len(cards)-1: story += [PageBreak()]
+              if i < len(keys)-1: story += [PageBreak()]
           def footer(c,d):
-              c.saveState(); c.setFont('DV',8); c.setFillColor(HexColor('#777066')); c.drawString(52,28,'Dmitri Kourliandski — Réflexions & citations'); c.drawRightString(A4[0]-52,28,str(d.page)); c.restoreState()
+              c.saveState(); c.setFont('DV',8); c.setFillColor(HexColor('#777066')); c.drawString(52,28,'Dmitri Kourliandski — Réflexions & citations'); c.restoreState()
           doc.build(story,onFirstPage=footer,onLaterPages=footer)
-          print('cards:',len(cards),'pdf:',out)
+          print('cards:',len(cards),'entries:',len(keys),'pdf:',out)
           assert len(cards)==52, f'Expected 52 cards, got {len(cards)}'
           PY
           python /tmp/build_pdf.py
