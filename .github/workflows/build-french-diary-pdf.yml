@@ -55,9 +55,10 @@ jobs:
           title=ParagraphStyle('title',fontName='DVB',fontSize=30,leading=32,spaceAfter=12,textColor=HexColor('#11110f'))
           sub=ParagraphStyle('sub',fontName='DV',fontSize=10,leading=14,spaceAfter=10,textColor=HexColor('#777066'))
           note=ParagraphStyle('note',fontName='DVI',fontSize=9,leading=12,spaceAfter=28,textColor=HexColor('#777066'))
+          intro=ParagraphStyle('intro',fontName='DV',fontSize=11.5,leading=17,alignment=TA_LEFT,spaceAfter=0,textColor=HexColor('#11110f'))
           num=ParagraphStyle('num',fontName='DVB',fontSize=10,leading=12,spaceAfter=12,textColor=HexColor('#777066'))
           body=ParagraphStyle('body',fontName='DV',fontSize=11.5,leading=17,alignment=TA_LEFT,textColor=HexColor('#11110f'))
-          story=[Paragraph('RÉFLEXIONS &amp; CITATIONS',title),Paragraph('Dmitri Kourliandski · 2002—2026 · version française',sub),Paragraph('Traduction automatique de l’anglais.',note)]
+          story=[Paragraph('RÉFLEXIONS &amp; CITATIONS',title),Paragraph('Dmitri Kourliandski · 2002—2026 · version française',sub),Paragraph('Traduction automatique de l’anglais.',note),Paragraph(clean(cards['00']),intro),PageBreak()]
           keys=[k for k in sorted(cards) if k!='00']
           for i,k in enumerate(keys):
               story += [Paragraph(k,num),Paragraph(clean(cards[k]),body)]
@@ -74,4 +75,4 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add fr/thoughts-fr-1.js fr/reflexions-et-citations.pdf
-          git diff --cached --quiet || (git commit -m 'Fix French no-win lottery translation and update PDF' && git push)
+          git diff --cached --quiet || (git commit -m 'Update French diary PDF' && git push)
