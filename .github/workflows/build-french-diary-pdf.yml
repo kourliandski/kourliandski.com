@@ -17,6 +17,15 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install reportlab
+      - name: Correct French diary text
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('fr/thoughts-fr-1.js')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('Une loterie sans possibilité de perdre', 'Une loterie sans possibilité de gagner')
+          p.write_text(s,encoding='utf-8')
+          PY
       - name: Build PDF
         run: |
           cat > /tmp/build_pdf.py <<'PY'
@@ -60,9 +69,9 @@ jobs:
           assert len(cards)==52, f'Expected 52 cards, got {len(cards)}'
           PY
           python /tmp/build_pdf.py
-      - name: Commit PDF
+      - name: Commit corrected diary and PDF
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add fr/reflexions-et-citations.pdf
-          git diff --cached --quiet || (git commit -m 'Update French diary PDF' && git push)
+          git add fr/thoughts-fr-1.js fr/reflexions-et-citations.pdf
+          git diff --cached --quiet || (git commit -m 'Fix French no-win lottery translation and update PDF' && git push)
