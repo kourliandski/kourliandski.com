@@ -1,0 +1,89 @@
+name: Build English diary PDF
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'thoughts.html'
+      - '.github/workflows/build-english-diary-pdf.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install reportlab
+      - name: Build English PDF from diary
+        run: |
+          cat > /tmp/build_en_pdf.py <<'PY'
+          import re, html, base64, json, urllib.request
+          from pathlib import Path
+          from reportlab.lib.pagesizes import A4
+          from reportlab.lib.styles import ParagraphStyle
+          from reportlab.lib.enums import TA_LEFT
+          from reportlab.lib.colors import HexColor
+          from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak
+          from reportlab.pdfbase import pdfmetrics
+          from reportlab.pdfbase.ttfonts import TTFont
+
+          src=Path('thoughts.html').read_text(encoding='utf-8')
+          m=re.search(r"const SOURCE='([^']+)'",src)
+          if not m: raise SystemExit('SOURCE not found')
+          req=urllib.request.Request(m.group(1),headers={'Accept':'application/vnd.github+json','User-Agent':'diary-pdf-builder'})
+          data=json.load(urllib.request.urlopen(req))
+          old=base64.b64decode(data['content']).decode('utf-8')
+
+          old_cards=[]
+          for mm in re.finditer(r'<section class="text-panel"[^>]*data-label="([^"]+)"[^>]*>.*?<div class="text-wrap">(.*?)</div>\s*</section>',old,re.S):
+              old_cards.append([mm.group(1),mm.group(2)])
+          if not old_cards: raise SystemExit('No source cards found')
+
+          cards={}
+          for label,text in old_cards:
+              if label=='00': new='00'
+              elif label=='Intro': new='01'
+              elif label.isdigit(): new=str(int(label)+1).zfill(2)
+              else: continue
+              cards[new]=text
+
+          block=re.search(r'const NEW_CARDS=\[(.*?)\]\.map\(',src,re.S)
+          if not block: raise SystemExit('NEW_CARDS not found')
+          for mm in re.finditer(r"\{label:'(\d{2})',html:`(.*?)`\}",block.group(1),re.S): cards[mm.group(1)]=mm.group(2)
+          assert '52' in cards, 'Card 52 missing'
+
+          def clean(s):
+              s=re.sub(r'</p>\s*<p>', '<br/><br/>',s)
+              s=re.sub(r'<[^>]+>','',s)
+              return html.unescape(s).replace('&','&amp;').replace('<','&lt;').replace('>','&gt;').replace('\n',' ')
+
+          font='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'; bold='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
+          pdfmetrics.registerFont(TTFont('DV',font)); pdfmetrics.registerFont(TTFont('DVB',bold))
+          out='thoughts-and-quotes.pdf'
+          doc=SimpleDocTemplate(out,pagesize=A4,rightMargin=52,leftMargin=52,topMargin=54,bottomMargin=54,title='Thoughts & Quotes — Dmitri Kourliandski',author='Dmitri Kourliandski')
+          title=ParagraphStyle('title',fontName='DVB',fontSize=30,leading=32,spaceAfter=12,textColor=HexColor('#11110f'))
+          sub=ParagraphStyle('sub',fontName='DV',fontSize=10,leading=14,spaceAfter=28,textColor=HexColor('#777066'))
+          intro=ParagraphStyle('intro',fontName='DV',fontSize=11.5,leading=17,alignment=TA_LEFT,textColor=HexColor('#11110f'))
+          num=ParagraphStyle('num',fontName='DVB',fontSize=10,leading=12,spaceAfter=12,textColor=HexColor('#777066'))
+          body=ParagraphStyle('body',fontName='DV',fontSize=11.5,leading=17,alignment=TA_LEFT,textColor=HexColor('#11110f'))
+          story=[Paragraph('THOUGHTS &amp; QUOTES',title),Paragraph('Dmitri Kourliandski · 2002—2026',sub),Paragraph(clean(cards['00']),intro),PageBreak()]
+          keys=[k for k in sorted(cards) if k!='00']
+          for i,k in enumerate(keys):
+              story += [Paragraph(k,num),Paragraph(clean(cards[k]),body)]
+              if i<len(keys)-1: story.append(PageBreak())
+          def footer(c,d):
+              c.saveState(); c.setFont('DV',8); c.setFillColor(HexColor('#777066')); c.drawString(52,28,'Dmitri Kourliandski — Thoughts & Quotes'); c.restoreState()
+          doc.build(story,onFirstPage=footer,onLaterPages=footer)
+          print('entries:',len(keys))
+          assert len(keys)==52, f'Expected 52 entries, got {len(keys)}'
+          PY
+          python /tmp/build_en_pdf.py
+      - name: Commit PDF
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add thoughts-and-quotes.pdf
+          git diff --cached --quiet || (git commit -m 'Update English diary PDF' && git push)
