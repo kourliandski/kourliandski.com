@@ -43,8 +43,11 @@ jobs:
           req=urllib.request.Request(m.group(1),headers={'Accept':'application/vnd.github+json','User-Agent':'diary-pdf-builder'})
           data=json.load(urllib.request.urlopen(req)); old=base64.b64decode(data['content']).decode('utf-8')
           old_cards=[]
-          for mm in re.finditer(r'<section class="text-panel"[^>]*data-label="([^"]+)"[^>]*>.*?<div class="text-wrap">(.*?)</div>\s*</section>',old,re.S): old_cards.append([mm.group(1),mm.group(2)])
-          if not old_cards: raise SystemExit('No source cards found')
+          for sec in re.findall(r'<section class="panel text-panel[^>]*data-label="([^"]+)"[^>]*>(.*?)</section>',old,re.S):
+              label,body=sec
+              tm=re.search(r'<div class="text-wrap">(.*?)(?=\n\s*</div>\s*$)',body,re.S)
+              if tm: old_cards.append((label,tm.group(1)))
+          if len(old_cards)!=41: raise SystemExit(f'Expected 41 source cards, got {len(old_cards)}')
           cards={}
           for label,text in old_cards:
               if label=='00': new='00'
@@ -64,13 +67,13 @@ jobs:
           title=ParagraphStyle('title',fontName='DVB',fontSize=30,leading=32,spaceAfter=12,textColor=HexColor('#11110f')); sub=ParagraphStyle('sub',fontName='DV',fontSize=10,leading=14,spaceAfter=28,textColor=HexColor('#777066')); intro=ParagraphStyle('intro',fontName='DV',fontSize=11.5,leading=17,alignment=TA_LEFT,textColor=HexColor('#11110f')); num=ParagraphStyle('num',fontName='DVB',fontSize=10,leading=12,spaceAfter=12,textColor=HexColor('#777066')); body=ParagraphStyle('body',fontName='DV',fontSize=11.5,leading=17,alignment=TA_LEFT,textColor=HexColor('#11110f'))
           story=[Paragraph('THOUGHTS &amp; QUOTES',title),Paragraph('Dmitri Kourliandski · 2002—2026',sub),Paragraph(clean(cards['00']),intro),PageBreak()]
           keys=[k for k in sorted(cards) if k!='00']
+          if keys != [str(i).zfill(2) for i in range(1,53)]: raise SystemExit(f'Unexpected card set: {keys}')
           for i,k in enumerate(keys):
               story += [Paragraph(k,num),Paragraph(clean(cards[k]),body)]
               if i<len(keys)-1: story.append(PageBreak())
           def footer(c,d):
               c.saveState(); c.setFont('DV',8); c.setFillColor(HexColor('#777066')); c.drawString(52,28,'Dmitri Kourliandski — Thoughts & Quotes'); c.restoreState()
           doc.build(story,onFirstPage=footer,onLaterPages=footer)
-          assert len(keys)==52, f'Expected 52 entries, got {len(keys)}'
           PY
           python /tmp/build_en_pdf.py
       - name: Commit diary link and PDF
