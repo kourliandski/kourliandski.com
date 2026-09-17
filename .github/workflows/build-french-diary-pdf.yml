@@ -17,13 +17,20 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install reportlab
-      - name: Correct French diary text
+      - name: Update diary sources
         run: |
           python - <<'PY'
           from pathlib import Path
           p=Path('fr/thoughts-fr-1.js')
           s=p.read_text(encoding='utf-8').replace('Une loterie sans possibilité de perdre', 'Une loterie sans possibilité de gagner')
           p.write_text(s,encoding='utf-8')
+          p=Path('thoughts.html')
+          s=p.read_text(encoding='utf-8')
+          if "{label:'52'" not in s:
+              needle="\n].map(card=>({...card,plain:card.html.replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim()}));"
+              card=",\n{label:'52',html:`<p>if the engine of creativity is doubt, then new technologies, particularly artificial intelligence, pose no danger to the creator. the danger arises when the results of an algorithm’s operations are accepted as absolute truth. but this applies not only to ai. historical models, musical systems, schools, technology, and our own experience can supplant thinking just as effectively as an algorithm — because we’ve grown accustomed to trusting them.</p><p>in this sense, ai finds itself in a rather strange position: it cannot be fully trusted, and we know this — it hallucinates. knowledge is most dangerous precisely when it ceases to suspect the possibility of its own hallucination and begins to pretend to be absolute.</p><p>if, however, the author’s primary task is to problematize, ai does not take the author’s place. the author’s place emerges precisely in the relationship between the machine’s proposal and the distrust of that proposal.</p>`}"
+              if needle not in s: raise SystemExit('Could not find NEW_CARDS end marker')
+              p.write_text(s.replace(needle,card+needle),encoding='utf-8')
           PY
       - name: Build PDF
         run: |
@@ -37,26 +44,18 @@ jobs:
           from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak
           from reportlab.pdfbase import pdfmetrics
           from reportlab.pdfbase.ttfonts import TTFont
-          font='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
-          bold='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
-          italic='/usr/share/fonts/truetype/dejavu/DejaVuSans-Oblique.ttf'
+          font='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'; bold='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'; italic='/usr/share/fonts/truetype/dejavu/DejaVuSans-Oblique.ttf'
           pdfmetrics.registerFont(TTFont('DV',font)); pdfmetrics.registerFont(TTFont('DVB',bold)); pdfmetrics.registerFont(TTFont('DVI',italic))
           cards={}
           for f in sorted(Path('fr').glob('thoughts-fr-*.js')):
               s=f.read_text(encoding='utf-8')
               for m in re.finditer(r"'(\d{2})':`(.*?)`(?=,\n'|\n\}\);|,?\s*$)",s,re.S): cards[m.group(1)]=m.group(2)
           def clean(s):
-              s=re.sub(r'</p>\s*<p>', '<br/><br/>', s)
-              s=re.sub(r'<[^>]+>', '', s)
+              s=re.sub(r'</p>\s*<p>', '<br/><br/>', s); s=re.sub(r'<[^>]+>', '', s)
               return html.unescape(s).replace('&','&amp;').replace('<','&lt;').replace('>','&gt;').replace('\n',' ')
           out='fr/reflexions-et-citations.pdf'
           doc=SimpleDocTemplate(out,pagesize=A4,rightMargin=52,leftMargin=52,topMargin=54,bottomMargin=54,title='Réflexions & citations — Dmitri Kourliandski',author='Dmitri Kourliandski')
-          title=ParagraphStyle('title',fontName='DVB',fontSize=30,leading=32,spaceAfter=12,textColor=HexColor('#11110f'))
-          sub=ParagraphStyle('sub',fontName='DV',fontSize=10,leading=14,spaceAfter=10,textColor=HexColor('#777066'))
-          note=ParagraphStyle('note',fontName='DVI',fontSize=9,leading=12,spaceAfter=28,textColor=HexColor('#777066'))
-          intro=ParagraphStyle('intro',fontName='DV',fontSize=11.5,leading=17,alignment=TA_LEFT,spaceAfter=0,textColor=HexColor('#11110f'))
-          num=ParagraphStyle('num',fontName='DVB',fontSize=10,leading=12,spaceAfter=12,textColor=HexColor('#777066'))
-          body=ParagraphStyle('body',fontName='DV',fontSize=11.5,leading=17,alignment=TA_LEFT,textColor=HexColor('#11110f'))
+          title=ParagraphStyle('title',fontName='DVB',fontSize=30,leading=32,spaceAfter=12,textColor=HexColor('#11110f')); sub=ParagraphStyle('sub',fontName='DV',fontSize=10,leading=14,spaceAfter=10,textColor=HexColor('#777066')); note=ParagraphStyle('note',fontName='DVI',fontSize=9,leading=12,spaceAfter=28,textColor=HexColor('#777066')); intro=ParagraphStyle('intro',fontName='DV',fontSize=11.5,leading=17,alignment=TA_LEFT,spaceAfter=0,textColor=HexColor('#11110f')); num=ParagraphStyle('num',fontName='DVB',fontSize=10,leading=12,spaceAfter=12,textColor=HexColor('#777066')); body=ParagraphStyle('body',fontName='DV',fontSize=11.5,leading=17,alignment=TA_LEFT,textColor=HexColor('#11110f'))
           story=[Paragraph('RÉFLEXIONS &amp; CITATIONS',title),Paragraph('Dmitri Kourliandski · 2002—2026 · version française',sub),Paragraph('Traduction automatique de l’anglais.',note),Paragraph(clean(cards['00']),intro),PageBreak()]
           keys=[k for k in sorted(cards) if k!='00']
           for i,k in enumerate(keys):
@@ -65,13 +64,12 @@ jobs:
           def footer(c,d):
               c.saveState(); c.setFont('DV',8); c.setFillColor(HexColor('#777066')); c.drawString(52,28,'Dmitri Kourliandski — Réflexions & citations'); c.restoreState()
           doc.build(story,onFirstPage=footer,onLaterPages=footer)
-          print('cards:',len(cards),'entries:',len(keys),'pdf:',out)
           assert len(cards)==53, f'Expected 53 cards, got {len(cards)}'
           PY
           python /tmp/build_pdf.py
-      - name: Commit PDF
+      - name: Commit diary and PDF
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add fr/thoughts-fr-1.js fr/reflexions-et-citations.pdf
-          git diff --cached --quiet || (git commit -m 'Update French diary PDF' && git push)
+          git add thoughts.html fr/thoughts-fr-1.js fr/reflexions-et-citations.pdf
+          git diff --cached --quiet || (git commit -m 'Update diary and French PDF' && git push)
