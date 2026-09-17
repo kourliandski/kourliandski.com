@@ -34,7 +34,7 @@ jobs:
           from reportlab.lib.styles import ParagraphStyle
           from reportlab.lib.enums import TA_LEFT
           from reportlab.lib.colors import HexColor
-          from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak
+          from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak, Spacer
           from reportlab.pdfbase import pdfmetrics
           from reportlab.pdfbase.ttfonts import TTFont
           src=Path('thoughts.html').read_text(encoding='utf-8')
@@ -58,18 +58,28 @@ jobs:
           block=re.search(r'const NEW_CARDS=\[(.*?)\]\.map\(',src,re.S)
           if not block: raise SystemExit('NEW_CARDS not found')
           for mm in re.finditer(r"\{label:'(\d{2})',html:`(.*?)`\}",block.group(1),re.S): cards[mm.group(1)]=mm.group(2)
-          def clean(s):
-              s=re.sub(r'</p>\s*<p>','<br/><br/>',s); s=re.sub(r'<[^>]+>','',s)
-              return html.unescape(s).replace('&','&amp;').replace('<','&lt;').replace('>','&gt;').replace('\n',' ')
+          def plain(s):
+              s=re.sub(r'<[^>]+>','',s)
+              return html.unescape(s).replace('&','&amp;').replace('<','&lt;').replace('>','&gt;').replace('\n',' ').strip()
+          def paras(s):
+              ps=re.findall(r'<p[^>]*>(.*?)</p>',s,re.S)
+              return [plain(p) for p in ps if plain(p)] or [plain(s)]
           font='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'; bold='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
           pdfmetrics.registerFont(TTFont('DV',font)); pdfmetrics.registerFont(TTFont('DVB',bold))
           doc=SimpleDocTemplate('thoughts-and-quotes.pdf',pagesize=A4,rightMargin=52,leftMargin=52,topMargin=54,bottomMargin=54,title='Thoughts & Quotes — Dmitri Kourliandski',author='Dmitri Kourliandski')
           title=ParagraphStyle('title',fontName='DVB',fontSize=30,leading=32,spaceAfter=12,textColor=HexColor('#11110f')); sub=ParagraphStyle('sub',fontName='DV',fontSize=10,leading=14,spaceAfter=28,textColor=HexColor('#777066')); intro=ParagraphStyle('intro',fontName='DV',fontSize=11.5,leading=17,alignment=TA_LEFT,textColor=HexColor('#11110f')); num=ParagraphStyle('num',fontName='DVB',fontSize=10,leading=12,spaceAfter=12,textColor=HexColor('#777066')); body=ParagraphStyle('body',fontName='DV',fontSize=11.5,leading=17,alignment=TA_LEFT,textColor=HexColor('#11110f'))
-          story=[Paragraph('THOUGHTS &amp; QUOTES',title),Paragraph('Dmitri Kourliandski · 2002—2026',sub),Paragraph(clean(cards['00']),intro),PageBreak()]
+          story=[Paragraph('THOUGHTS &amp; QUOTES',title),Paragraph('Dmitri Kourliandski · 2002—2026',sub)]
+          for j,p in enumerate(paras(cards['00'])):
+              story.append(Paragraph(p,intro))
+              if j < len(paras(cards['00']))-1: story.append(Spacer(1,9))
+          story.append(PageBreak())
           keys=[k for k in sorted(cards) if k!='00']
           if keys != [str(i).zfill(2) for i in range(1,53)]: raise SystemExit(f'Unexpected card set: {keys}')
           for i,k in enumerate(keys):
-              story += [Paragraph(k,num),Paragraph(clean(cards[k]),body)]
+              story.append(Paragraph(k,num)); ps=paras(cards[k])
+              for j,p in enumerate(ps):
+                  story.append(Paragraph(p,body))
+                  if j < len(ps)-1: story.append(Spacer(1,9))
               if i<len(keys)-1: story.append(PageBreak())
           def footer(c,d):
               c.saveState(); c.setFont('DV',8); c.setFillColor(HexColor('#777066')); c.drawString(52,28,'Dmitri Kourliandski — Thoughts & Quotes'); c.restoreState()
