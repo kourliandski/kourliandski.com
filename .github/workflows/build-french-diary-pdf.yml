@@ -17,22 +17,13 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install reportlab
-      - name: Correct French diary text and add English card 52
+      - name: Correct French diary text
         run: |
           python - <<'PY'
           from pathlib import Path
           p=Path('fr/thoughts-fr-1.js')
           s=p.read_text(encoding='utf-8').replace('Une loterie sans possibilité de perdre', 'Une loterie sans possibilité de gagner')
           p.write_text(s,encoding='utf-8')
-          p=Path('thoughts.html')
-          s=p.read_text(encoding='utf-8')
-          if "{label:'52'" not in s:
-              needle="\n].map(card=>({...card,plain:card.html.replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim()}));"
-              card=""",
-{label:'52',html:`<p>if the engine of creativity is doubt, then new technologies, particularly artificial intelligence, pose no danger to the creator. the danger arises when the results of an algorithm’s operations are accepted as absolute truth. but this applies not only to ai. historical models, musical systems, schools, technology, and our own experience can supplant thinking just as effectively as an algorithm — because we’ve grown accustomed to trusting them.</p><p>in this sense, ai finds itself in a rather strange position: it cannot be fully trusted, and we know this — it hallucinates. knowledge is most dangerous precisely when it ceases to suspect the possibility of its own hallucination and begins to pretend to be absolute.</p><p>if, however, the author’s primary task is to problematize, ai does not take the author’s place. the author’s place emerges precisely in the relationship between the machine’s proposal and the distrust of that proposal.</p>`}"""
-              if needle not in s: raise SystemExit('Could not find NEW_CARDS end marker')
-              s=s.replace(needle,card+needle)
-              p.write_text(s,encoding='utf-8')
           PY
       - name: Build PDF
         run: |
@@ -75,12 +66,12 @@ jobs:
               c.saveState(); c.setFont('DV',8); c.setFillColor(HexColor('#777066')); c.drawString(52,28,'Dmitri Kourliandski — Réflexions & citations'); c.restoreState()
           doc.build(story,onFirstPage=footer,onLaterPages=footer)
           print('cards:',len(cards),'entries:',len(keys),'pdf:',out)
-          assert len(cards) in (52,53), f'Expected 52 or 53 cards, got {len(cards)}'
+          assert len(cards)==53, f'Expected 53 cards, got {len(cards)}'
           PY
           python /tmp/build_pdf.py
-      - name: Commit corrected diary and PDF
+      - name: Commit PDF
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add thoughts.html fr/thoughts-fr-1.js fr/reflexions-et-citations.pdf
-          git diff --cached --quiet || (git commit -m 'Update diary and French PDF' && git push)
+          git add fr/thoughts-fr-1.js fr/reflexions-et-citations.pdf
+          git diff --cached --quiet || (git commit -m 'Update French diary PDF' && git push)
