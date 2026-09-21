@@ -316,12 +316,30 @@ button:focus-visible {
 }
 
 .info-link-row a {
+  display: inline-flex;
+  align-items: center;
   color: #fff;
   text-decoration: none;
   border-bottom: 1px solid rgba(255,255,255,.45);
   padding-bottom: 2px;
   letter-spacing: .08em;
   font-size: 11px;
+}
+
+.physical-arrow {
+  display: inline-flex;
+  flex: 0 0 11px;
+  width: 11px;
+  height: 11px;
+  margin-left: 4px;
+}
+
+.physical-arrow svg {
+  display: block;
+  width: 11px;
+  height: 11px;
+  max-width: 11px;
+  max-height: 11px;
 }
 
 .info-link-row a:hover {
