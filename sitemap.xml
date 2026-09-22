@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://kourliandski.com/</loc>
+    <lastmod>2026-09-22</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kourliandski.com/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://kourliandski.com/fr/"/>
+  </url>
+  <url>
+    <loc>https://kourliandski.com/fr/</loc>
+    <lastmod>2026-09-22</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kourliandski.com/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://kourliandski.com/fr/"/>
+  </url>
+  <url><loc>https://kourliandski.com/biography.html</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://kourliandski.com/fr/biography.html</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://kourliandski.com/en/works.html</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://kourliandski.com/fr/works.html</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://kourliandski.com/en/releases.html</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://kourliandski.com/fr/releases.html</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://kourliandski.com/en/bibliography.html</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://kourliandski.com/fr/bibliography.html</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://kourliandski.com/en/thoughts.html</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://kourliandski.com/fr/thoughts.html</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://kourliandski.com/radio-espaces-bruts/</loc><lastmod>2026-09-22</lastmod></url>
+</urlset>
