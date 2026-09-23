@@ -3,15 +3,24 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://kourliandski.com/</loc>
-    <lastmod>2026-09-22</lastmod>
+    <lastmod>2026-09-23</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://kourliandski.com/"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://kourliandski.com/fr/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kourliandski.com/ru/"/>
   </url>
   <url>
     <loc>https://kourliandski.com/fr/</loc>
-    <lastmod>2026-09-22</lastmod>
+    <lastmod>2026-09-23</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://kourliandski.com/"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://kourliandski.com/fr/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kourliandski.com/ru/"/>
+  </url>
+  <url>
+    <loc>https://kourliandski.com/ru/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kourliandski.com/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://kourliandski.com/fr/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://kourliandski.com/ru/"/>
   </url>
   <url><loc>https://kourliandski.com/biography.html</loc><lastmod>2026-09-22</lastmod></url>
   <url><loc>https://kourliandski.com/fr/biography.html</loc><lastmod>2026-09-22</lastmod></url>
@@ -23,5 +32,9 @@
   <url><loc>https://kourliandski.com/fr/bibliography.html</loc><lastmod>2026-09-22</lastmod></url>
   <url><loc>https://kourliandski.com/en/thoughts.html</loc><lastmod>2026-09-22</lastmod></url>
   <url><loc>https://kourliandski.com/fr/thoughts.html</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://kourliandski.com/ru/biography.html</loc><lastmod>2026-09-23</lastmod></url>
+  <url><loc>https://kourliandski.com/ru/works.html</loc><lastmod>2026-09-23</lastmod></url>
+  <url><loc>https://kourliandski.com/ru/releases.html</loc><lastmod>2026-09-23</lastmod></url>
+  <url><loc>https://kourliandski.com/ru/bibliography.html</loc><lastmod>2026-09-23</lastmod></url>
   <url><loc>https://kourliandski.com/radio-espaces-bruts/</loc><lastmod>2026-09-22</lastmod></url>
 </urlset>
