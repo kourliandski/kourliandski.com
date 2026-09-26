@@ -68,7 +68,7 @@ jobs:
           def footer(c,d):
               c.saveState(); c.setFont('DV',8); c.setFillColor(HexColor('#777066')); c.drawString(52,28,'Dmitri Kourliandski — Réflexions & citations'); c.restoreState()
           doc.build(story,onFirstPage=footer,onLaterPages=footer)
-          assert len(cards)==53, f'Expected 53 cards, got {len(cards)}'
+          assert len(cards)==54, f'Expected 54 cards, got {len(cards)}'
           PY
           python /tmp/build_pdf.py
       - name: Commit diary and PDF
