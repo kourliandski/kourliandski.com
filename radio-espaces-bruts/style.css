@@ -315,7 +315,8 @@ button:focus-visible {
   margin-bottom: 0 !important;
 }
 
-.info-link-row a {
+.info-link-row a,
+.physical-edition {
   display: inline-flex;
   align-items: center;
   color: #fff;
@@ -324,6 +325,11 @@ button:focus-visible {
   padding-bottom: 2px;
   letter-spacing: .08em;
   font-size: 11px;
+}
+
+.physical-edition {
+  border-bottom: 0;
+  color: rgba(255,255,255,.65);
 }
 
 .physical-arrow {
