@@ -1,0 +1,7 @@
+@media (max-width: 760px) {
+  .global-site-nav .nav-right > a:nth-last-child(-n + 2),
+  .global-site-nav .nav-right > a:nth-last-child(-n + 2) .lang-short {
+    font-size: 9px !important;
+    letter-spacing: .07em !important;
+  }
+}
