@@ -1,5 +1,6 @@
 const OVERLAP_SECONDS = 8;
 const CROSSFADE_SECONDS = 15;
+const STOP_FADE_SECONDS = 2;
 
 const FILES = [
   "https://static.wixstatic.com/mp3/491527_7c5add4103a14ded9412746b00858abc.mp3",
@@ -56,6 +57,7 @@ let next = audioB;
 let currentIndex = -1;
 let nextIndex = -1;
 let isPlaying = false;
+let isStopping = false;
 let overlapStarted = false;
 
 let audioContext;
@@ -248,7 +250,7 @@ audioA.addEventListener("ended", () => finishCurrent(audioA));
 audioB.addEventListener("ended", () => finishCurrent(audioB));
 
 async function startArchive() {
-  if (isPlaying) return;
+  if (isPlaying || isStopping) return;
 
   const id = ++transitionId;
   isPlaying = true;
@@ -280,26 +282,61 @@ async function startArchive() {
 }
 
 function stopArchive() {
-  transitionId++;
+  if (isStopping || !isPlaying) return;
+  const id = ++transitionId;
   clearTimeout(fadeTimer);
   resetTransitionProgress();
   manualFade = false;
   isPlaying = false;
+  isStopping = true;
   overlapStarted = false;
-
-  [audioA, audioB].forEach(player => {
-    player.pause();
-    resetGain(player);
-    try { player.currentTime = 0; } catch (_) {}
-  });
-
-  current = audioA;
-  next = audioB;
-  currentIndex = -1;
-  nextIndex = -1;
+  button.disabled = true;
   updateNextButton();
-  icon.innerHTML = PLAY_ICON;
-  icon.className = "play";
+
+  const finishStop = () => {
+    if (id !== transitionId) return;
+    [audioA, audioB].forEach(player => {
+      player.pause();
+      resetGain(player);
+      try { player.currentTime = 0; } catch (_) {}
+    });
+    current = audioA;
+    next = audioB;
+    currentIndex = -1;
+    nextIndex = -1;
+    isStopping = false;
+    button.disabled = false;
+    updateNextButton();
+    icon.innerHTML = PLAY_ICON;
+    icon.className = "play";
+  };
+
+  if (!audioContext) {
+    finishStop();
+    return;
+  }
+  const start = audioContext.currentTime;
+  [audioA, audioB].forEach(player => {
+    const gain = gains.get(player);
+    // Hold the current level, including midway through a crossfade.
+    if (typeof gain.cancelAndHoldAtTime === "function") {
+      gain.cancelAndHoldAtTime(start);
+    } else {
+      const level = gain.value;
+      gain.cancelScheduledValues(start);
+      gain.setValueAtTime(level, start);
+    }
+    gain.linearRampToValueAtTime(0, start + STOP_FADE_SECONDS);
+  });
+  const checkStop = () => {
+    if (id !== transitionId) return;
+    if (audioContext.currentTime < start + STOP_FADE_SECONDS) {
+      fadeTimer = setTimeout(checkStop, 50);
+      return;
+    }
+    finishStop();
+  };
+  fadeTimer = setTimeout(checkStop, STOP_FADE_SECONDS * 1000);
 }
 
 button.addEventListener("click", () => {
