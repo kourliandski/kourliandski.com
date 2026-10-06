@@ -1,4 +1,5 @@
 const OVERLAP_SECONDS = 8;
+const CROSSFADE_SECONDS = 15;
 
 const FILES = [
   "https://static.wixstatic.com/mp3/491527_7c5add4103a14ded9412746b00858abc.mp3",
@@ -28,6 +29,7 @@ const FILES = [
 ];
 
 const button = document.getElementById("toggle");
+const nextButton = document.getElementById("nextTrack");
 const icon = document.getElementById("icon");
 const fullscreenButton = document.getElementById("fullscreenToggle");
 const enterFullscreenIcon = document.getElementById("enterFullscreenIcon");
@@ -39,6 +41,7 @@ const audioA = new Audio();
 const audioB = new Audio();
 
 [audioA, audioB].forEach(a => {
+  a.crossOrigin = "anonymous";
   a.preload = "auto";
   a.volume = 1;
 });
@@ -49,6 +52,84 @@ let currentIndex = -1;
 let nextIndex = -1;
 let isPlaying = false;
 let overlapStarted = false;
+
+let audioContext;
+const gains = new Map();
+let transitionId = 0;
+let manualFade = false;
+let fadeTimer;
+
+function updateNextButton() {
+  nextButton.disabled = !isPlaying || overlapStarted || manualFade;
+}
+
+async function enableAudio() {
+  if (!audioContext) {
+    const Context = window.AudioContext || window.webkitAudioContext;
+    audioContext = new Context();
+    [audioA, audioB].forEach(player => {
+      const gain = audioContext.createGain();
+      audioContext.createMediaElementSource(player).connect(gain);
+      gain.connect(audioContext.destination);
+      gains.set(player, gain.gain);
+    });
+  }
+  await audioContext.resume();
+}
+
+function resetGain(player, value = 1) {
+  const gain = gains.get(player);
+  if (!gain) return;
+  gain.cancelScheduledValues(audioContext.currentTime);
+  gain.setValueAtTime(value, audioContext.currentTime);
+}
+
+async function skipTrack() {
+  if (!isPlaying || overlapStarted || manualFade) return;
+  manualFade = true;
+  updateNextButton();
+  const id = ++transitionId;
+  const outgoing = current;
+  const incoming = next;
+  try {
+    await enableAudio();
+    if (id !== transitionId || !isPlaying) return;
+    resetGain(incoming, 0);
+    await incoming.play();
+    if (id !== transitionId || !isPlaying) return;
+    const start = audioContext.currentTime;
+    gains.get(outgoing).linearRampToValueAtTime(0, start + CROSSFADE_SECONDS);
+    gains.get(incoming).linearRampToValueAtTime(1, start + CROSSFADE_SECONDS);
+    const finishFade = () => {
+      if (id !== transitionId || !isPlaying) return;
+      // AudioContext time keeps the fade accurate when a tab is backgrounded.
+      if (audioContext.currentTime < start + CROSSFADE_SECONDS) {
+        fadeTimer = setTimeout(finishFade, 100);
+        return;
+      }
+      outgoing.pause();
+      current = incoming;
+      next = outgoing;
+      currentIndex = nextIndex;
+      resetGain(current);
+      manualFade = false;
+      prepareNext();
+      updateNextButton();
+    };
+    fadeTimer = setTimeout(finishFade, CROSSFADE_SECONDS * 1000);
+  } catch (error) {
+    console.error(error);
+    if (id !== transitionId) return;
+    incoming.pause();
+    resetGain(incoming);
+    resetGain(outgoing);
+    manualFade = false;
+    updateNextButton();
+  }
+}
+
+nextButton.addEventListener("click", skipTrack);
+updateNextButton();
 
 function randomIndex(excluded = -1) {
   if (FILES.length === 1) return 0;
@@ -63,6 +144,7 @@ function loadTrack(player, index) {
   player.src = FILES[index];
   player.preload = "auto";
   player.volume = 1;
+  resetGain(player);
   player.load();
 }
 
@@ -72,18 +154,20 @@ function prepareNext() {
 }
 
 async function startOverlap() {
-  if (!isPlaying || overlapStarted) return;
+  if (!isPlaying || overlapStarted || manualFade) return;
   overlapStarted = true;
+  updateNextButton();
   try {
     await next.play();
   } catch (error) {
     console.error(error);
     overlapStarted = false;
+    updateNextButton();
   }
 }
 
 function checkOverlap(player) {
-  if (!isPlaying || player !== current || overlapStarted) return;
+  if (!isPlaying || player !== current || overlapStarted || manualFade) return;
   if (!Number.isFinite(player.duration) || player.duration <= 0) return;
 
   if (player.duration - player.currentTime <= OVERLAP_SECONDS) {
@@ -92,7 +176,8 @@ function checkOverlap(player) {
 }
 
 async function finishCurrent(player) {
-  if (!isPlaying || player !== current) return;
+  if (!isPlaying || player !== current || manualFade) return;
+  const id = transitionId;
 
   if (next.paused) {
     try {
@@ -103,12 +188,14 @@ async function finishCurrent(player) {
     }
   }
 
+  if (id !== transitionId || !isPlaying) return;
   const oldCurrent = current;
   current = next;
   next = oldCurrent;
   currentIndex = nextIndex;
   overlapStarted = false;
   prepareNext();
+  updateNextButton();
 }
 
 audioA.addEventListener("timeupdate", () => checkOverlap(audioA));
@@ -119,7 +206,9 @@ audioB.addEventListener("ended", () => finishCurrent(audioB));
 async function startArchive() {
   if (isPlaying) return;
 
+  const id = ++transitionId;
   isPlaying = true;
+  updateNextButton();
   overlapStarted = false;
   icon.textContent = "■";
   icon.className = "stop";
@@ -129,21 +218,33 @@ async function startArchive() {
   prepareNext();
 
   try {
+    await enableAudio();
+    if (id !== transitionId || !isPlaying) return;
     await current.play();
+    if (id !== transitionId || !isPlaying) {
+      if (!isPlaying) current.pause();
+      return;
+    }
   } catch (error) {
     console.error(error);
+    if (id !== transitionId) return;
     isPlaying = false;
+    updateNextButton();
     icon.textContent = "▶";
     icon.className = "play";
   }
 }
 
 function stopArchive() {
+  transitionId++;
+  clearTimeout(fadeTimer);
+  manualFade = false;
   isPlaying = false;
   overlapStarted = false;
 
   [audioA, audioB].forEach(player => {
     player.pause();
+    resetGain(player);
     try { player.currentTime = 0; } catch (_) {}
   });
 
@@ -151,6 +252,7 @@ function stopArchive() {
   next = audioB;
   currentIndex = -1;
   nextIndex = -1;
+  updateNextButton();
   icon.textContent = "▶";
   icon.className = "play";
 }
