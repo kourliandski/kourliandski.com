@@ -472,3 +472,11 @@ button:focus-visible {
 @media (max-width: 600px) {
   #nextTrack { width: 74px; height: 74px; }
 }
+
+#toggle { position: relative; }
+#toggle.is-playing { border-color: rgba(255,255,255,.25); }
+#toggle.is-playing .playback-progress { opacity: 1; }
+.playback-progress circle { transition: stroke-dashoffset 200ms linear; }
+@media (prefers-reduced-motion: reduce) {
+  .playback-progress circle { transition: none; }
+}
