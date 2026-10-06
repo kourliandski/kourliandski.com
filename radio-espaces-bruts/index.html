@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ESPACES BRUTS</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=20261006">
 <link rel="icon" type="image/png" sizes="32x32" href="/radio-espaces-bruts/radio-favicon-32.png?v=2">
 <link rel="icon" type="image/png" sizes="16x16" href="/radio-espaces-bruts/radio-favicon-16.png?v=2">
 <link rel="shortcut icon" href="/radio-espaces-bruts/radio-favicon.ico?v=2">
@@ -30,9 +30,14 @@
 <section class="panel">
 <img class="logo" src="logo.svg" alt="Dmitri Kourliandski — Espaces Bruts">
 
+<div class="playback-controls">
 <button id="toggle" type="button" aria-label="Play / Stop">
 <span id="icon">▶</span>
 </button>
+<button id="nextTrack" type="button" aria-label="Next random track — 15-second crossfade" title="Next random track · 15-second crossfade" disabled>
+<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M5 5v14l10-7zM18 5v14" fill="currentColor" stroke="currentColor" stroke-width="2"/></svg>
+</button>
+</div>
 </section>
 
 <button id="infoToggle" class="info-button" type="button" aria-label="Project information">ⓘ</button>
@@ -106,6 +111,6 @@ if (infoToggle && infoModal && infoClose) {
 }
 </script>
 
-<script src="player.js"></script>
+<script src="player.js?v=20261006"></script>
 </body>
 </html>
