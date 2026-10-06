@@ -36,6 +36,9 @@ const fullscreenButton = document.getElementById("fullscreenToggle");
 const enterFullscreenIcon = document.getElementById("enterFullscreenIcon");
 const exitFullscreenIcon = document.getElementById("exitFullscreenIcon");
 
+const PLAY_ICON = '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M6 3v18l15-9z" fill="currentColor"/></svg>';
+const STOP_ICON = '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect x="4" y="4" width="16" height="16" fill="currentColor"/></svg>';
+icon.innerHTML = PLAY_ICON;
 icon.className = "play";
 
 const audioA = new Audio();
@@ -233,7 +236,7 @@ async function startArchive() {
   isPlaying = true;
   updateNextButton();
   overlapStarted = false;
-  icon.textContent = "■";
+  icon.innerHTML = STOP_ICON;
   icon.className = "stop";
 
   currentIndex = randomIndex();
@@ -253,7 +256,7 @@ async function startArchive() {
     if (id !== transitionId) return;
     isPlaying = false;
     updateNextButton();
-    icon.textContent = "▶";
+    icon.innerHTML = PLAY_ICON;
     icon.className = "play";
   }
 }
@@ -277,7 +280,7 @@ function stopArchive() {
   currentIndex = -1;
   nextIndex = -1;
   updateNextButton();
-  icon.textContent = "▶";
+  icon.innerHTML = PLAY_ICON;
   icon.className = "play";
 }
 
