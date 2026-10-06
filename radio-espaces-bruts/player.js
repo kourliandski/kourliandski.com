@@ -30,6 +30,7 @@ const FILES = [
 
 const button = document.getElementById("toggle");
 const nextButton = document.getElementById("nextTrack");
+const progressCircle = document.getElementById("transitionProgress");
 const icon = document.getElementById("icon");
 const fullscreenButton = document.getElementById("fullscreenToggle");
 const enterFullscreenIcon = document.getElementById("enterFullscreenIcon");
@@ -58,6 +59,25 @@ const gains = new Map();
 let transitionId = 0;
 let manualFade = false;
 let fadeTimer;
+let progressFrame;
+
+function resetTransitionProgress() {
+  cancelAnimationFrame(progressFrame);
+  nextButton.classList.remove("is-transitioning");
+  progressCircle.style.strokeDashoffset = "1";
+}
+
+function showTransitionProgress(start, id) {
+  nextButton.classList.add("is-transitioning");
+  const draw = () => {
+    if (id !== transitionId || !manualFade || !isPlaying) return;
+    const progress = Math.min(1, Math.max(0,
+      (audioContext.currentTime - start) / CROSSFADE_SECONDS));
+    progressCircle.style.strokeDashoffset = String(1 - progress);
+    if (progress < 1) progressFrame = requestAnimationFrame(draw);
+  };
+  draw();
+}
 
 function updateNextButton() {
   nextButton.disabled = !isPlaying || overlapStarted || manualFade;
@@ -98,6 +118,7 @@ async function skipTrack() {
     await incoming.play();
     if (id !== transitionId || !isPlaying) return;
     const start = audioContext.currentTime;
+    showTransitionProgress(start, id);
     gains.get(outgoing).linearRampToValueAtTime(0, start + CROSSFADE_SECONDS);
     gains.get(incoming).linearRampToValueAtTime(1, start + CROSSFADE_SECONDS);
     const finishFade = () => {
@@ -113,6 +134,7 @@ async function skipTrack() {
       currentIndex = nextIndex;
       resetGain(current);
       manualFade = false;
+      resetTransitionProgress();
       prepareNext();
       updateNextButton();
     };
@@ -124,6 +146,7 @@ async function skipTrack() {
     resetGain(incoming);
     resetGain(outgoing);
     manualFade = false;
+    resetTransitionProgress();
     updateNextButton();
   }
 }
@@ -238,6 +261,7 @@ async function startArchive() {
 function stopArchive() {
   transitionId++;
   clearTimeout(fadeTimer);
+  resetTransitionProgress();
   manualFade = false;
   isPlaying = false;
   overlapStarted = false;
