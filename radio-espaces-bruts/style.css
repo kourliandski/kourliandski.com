@@ -123,11 +123,13 @@ button:focus-visible {
 
 .fullscreen-button {
     position: fixed;
-    top: 18px;
+    top: 5px;
     left: 50%;
     transform: translateX(-50%);
-    width: 18px;
-    height: 18px;
+    width: 44px;
+    height: 44px;
+    z-index: 10;
+    touch-action: manipulation;
     border: none;
     background: transparent;
     color: rgba(255,255,255,.4);
@@ -164,8 +166,8 @@ button:focus-visible {
   }
 
   .fullscreen-button {
-    top: 14px;
-    right: 14px;
+    top: 1px;
+    right: auto;
   }
 }
 
@@ -486,3 +488,6 @@ button:focus-visible {
 }
 
 #icon svg { display: block; flex: none; }
+
+.fullscreen-button:active { transform: translateX(-50%); }
+.fullscreen-icon { pointer-events: none; }
