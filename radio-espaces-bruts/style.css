@@ -103,7 +103,11 @@ button:focus-visible {
 }
 
 #icon {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
   font-size: 26px;
   line-height: 1;
   transition: transform 0.15s ease;
@@ -480,3 +484,5 @@ button:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .playback-progress circle { transition: none; }
 }
+
+#icon svg { display: block; flex: none; }
