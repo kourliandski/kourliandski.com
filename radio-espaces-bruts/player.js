@@ -61,6 +61,7 @@ let isStopping = false;
 let overlapStarted = false;
 
 let audioContext;
+let outputGain;
 const gains = new Map();
 let transitionId = 0;
 let manualFade = false;
@@ -110,10 +111,12 @@ async function enableAudio() {
   if (!audioContext) {
     const Context = window.AudioContext || window.webkitAudioContext;
     audioContext = new Context();
+    outputGain = audioContext.createGain();
+    outputGain.connect(audioContext.destination);
     [audioA, audioB].forEach(player => {
       const gain = audioContext.createGain();
       audioContext.createMediaElementSource(player).connect(gain);
-      gain.connect(audioContext.destination);
+      gain.connect(outputGain);
       gains.set(player, gain.gain);
     });
   }
@@ -278,6 +281,8 @@ async function startArchive() {
   try {
     await enableAudio();
     if (id !== transitionId || !isPlaying) return;
+    outputGain.gain.cancelScheduledValues(audioContext.currentTime);
+    outputGain.gain.setValueAtTime(1, audioContext.currentTime);
     await current.play();
     if (id !== transitionId || !isPlaying) {
       if (!isPlaying) current.pause();
@@ -309,7 +314,6 @@ function stopArchive() {
     if (id !== transitionId) return;
     [audioA, audioB].forEach(player => {
       player.pause();
-      resetGain(player);
       try { player.currentTime = 0; } catch (_) {}
     });
     current = audioA;
@@ -328,18 +332,12 @@ function stopArchive() {
     return;
   }
   const start = audioContext.currentTime;
-  [audioA, audioB].forEach(player => {
-    const gain = gains.get(player);
-    // Hold the current level, including midway through a crossfade.
-    if (typeof gain.cancelAndHoldAtTime === "function") {
-      gain.cancelAndHoldAtTime(start);
-    } else {
-      const level = gain.value;
-      gain.cancelScheduledValues(start);
-      gain.setValueAtTime(level, start);
-    }
-    gain.linearRampToValueAtTime(0, start + STOP_FADE_SECONDS);
-  });
+  // A separate output envelope fades the entire mix without interrupting
+  // track curves. Keep it muted after pausing to prevent buffered audio leaks.
+  const gain = outputGain.gain;
+  gain.cancelScheduledValues(start);
+  gain.setValueAtTime(1, start);
+  gain.linearRampToValueAtTime(0, start + STOP_FADE_SECONDS);
   const checkStop = () => {
     if (id !== transitionId) return;
     if (audioContext.currentTime < start + STOP_FADE_SECONDS) {
