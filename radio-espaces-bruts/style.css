@@ -447,6 +447,28 @@ button:focus-visible {
 }
 
 .playback-controls { display: flex; align-items: center; justify-content: center; gap: 22px; }
-#nextTrack { width: 54px; height: 54px; }
+#nextTrack { position: relative; width: 82px; height: 82px; }
 #nextTrack:disabled { opacity: .3; cursor: default; }
 #nextTrack:disabled:hover { background: rgba(0,0,0,.08); }
+
+.transition-progress {
+  position: absolute;
+  inset: -1px;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  transform: rotate(-90deg);
+  pointer-events: none;
+  opacity: 0;
+}
+.transition-progress circle {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 3;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+#nextTrack.is-transitioning { opacity: 1; border-color: rgba(255,255,255,.25); }
+#nextTrack.is-transitioning .transition-progress { opacity: 1; }
+@media (max-width: 600px) {
+  #nextTrack { width: 74px; height: 74px; }
+}
