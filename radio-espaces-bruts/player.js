@@ -30,6 +30,7 @@ const FILES = [
 
 const button = document.getElementById("toggle");
 const nextButton = document.getElementById("nextTrack");
+const playbackProgress = document.getElementById("playbackProgress");
 const progressCircle = document.getElementById("transitionProgress");
 const icon = document.getElementById("icon");
 const fullscreenButton = document.getElementById("fullscreenToggle");
@@ -82,7 +83,24 @@ function showTransitionProgress(start, id) {
   draw();
 }
 
+function updatePlaybackProgress() {
+  const duration = current.duration;
+  const progress = isPlaying && Number.isFinite(duration) && duration > 0
+    ? Math.min(1, Math.max(0, current.currentTime / duration)) : 0;
+  playbackProgress.style.strokeDashoffset = String(1 - progress);
+  button.classList.toggle("is-playing", isPlaying);
+}
+
+[audioA, audioB].forEach(player => {
+  ["timeupdate", "loadedmetadata", "durationchange", "emptied"].forEach(event => {
+    player.addEventListener(event, () => {
+      if (player === current) updatePlaybackProgress();
+    });
+  });
+});
+
 function updateNextButton() {
+  updatePlaybackProgress();
   nextButton.disabled = !isPlaying || overlapStarted || manualFade;
 }
 
