@@ -445,3 +445,8 @@ button:focus-visible {
   }
   .info-button { right: 14px; bottom: 14px; }
 }
+
+.playback-controls { display: flex; align-items: center; justify-content: center; gap: 22px; }
+#nextTrack { width: 54px; height: 54px; }
+#nextTrack:disabled { opacity: .3; cursor: default; }
+#nextTrack:disabled:hover { background: rgba(0,0,0,.08); }
