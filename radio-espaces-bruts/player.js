@@ -142,8 +142,20 @@ async function skipTrack() {
     if (id !== transitionId || !isPlaying) return;
     const start = audioContext.currentTime;
     showTransitionProgress(start, id);
-    gains.get(outgoing).linearRampToValueAtTime(0, start + CROSSFADE_SECONDS);
-    gains.get(incoming).linearRampToValueAtTime(1, start + CROSSFADE_SECONDS);
+    // Anchor both envelopes at the actual transition start.
+    // Equal-power curves avoid a perceived dip between independent tracks.
+    resetGain(outgoing, 1);
+    resetGain(incoming, 0);
+    const fadeOut = new Float32Array(257);
+    const fadeIn = new Float32Array(257);
+    for (let i = 0; i < fadeOut.length; i++) {
+      const angle = (i / (fadeOut.length - 1)) * Math.PI / 2;
+      fadeOut[i] = Math.cos(angle);
+      fadeIn[i] = Math.sin(angle);
+    }
+    fadeOut[fadeOut.length - 1] = 0;
+    gains.get(outgoing).setValueCurveAtTime(fadeOut, start, CROSSFADE_SECONDS);
+    gains.get(incoming).setValueCurveAtTime(fadeIn, start, CROSSFADE_SECONDS);
     const finishFade = () => {
       if (id !== transitionId || !isPlaying) return;
       // AudioContext time keeps the fade accurate when a tab is backgrounded.
