@@ -74,7 +74,7 @@ jobs:
               if j < len(paras(cards['00']))-1: story.append(Spacer(1,9))
           story.append(PageBreak())
           keys=[k for k in sorted(cards) if k!='00']
-          if keys != [str(i).zfill(2) for i in range(1,54)]: raise SystemExit(f'Unexpected card set: {keys}')
+          if keys != [str(i).zfill(2) for i in range(1,55)]: raise SystemExit(f'Unexpected card set: {keys}')
           for i,k in enumerate(keys):
               story.append(Paragraph(k,num)); ps=paras(cards[k])
               for j,p in enumerate(ps):
