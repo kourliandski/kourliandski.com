@@ -3,7 +3,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'thoughts.html'
+      - 'en/thoughts.html'
       - '.github/workflows/build-english-diary-pdf.yml'
   workflow_dispatch:
 permissions:
@@ -21,7 +21,7 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          p=Path('thoughts.html'); s=p.read_text(encoding='utf-8')
+          p=Path('en/thoughts.html'); s=p.read_text(encoding='utf-8')
           s=s.replace('href="thoughts-and-quotes-2026-09-13-no-page-numbers.pdf" download="thoughts-and-quotes-2026-09-13.pdf"','href="thoughts-and-quotes.pdf" download="thoughts-and-quotes.pdf"')
           p.write_text(s,encoding='utf-8')
           PY
@@ -37,7 +37,7 @@ jobs:
           from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak, Spacer
           from reportlab.pdfbase import pdfmetrics
           from reportlab.pdfbase.ttfonts import TTFont
-          src=Path('thoughts.html').read_text(encoding='utf-8')
+          src=Path('en/thoughts.html').read_text(encoding='utf-8')
           m=re.search(r"const SOURCE='([^']+)'",src)
           if not m: raise SystemExit('SOURCE not found')
           req=urllib.request.Request(m.group(1),headers={'Accept':'application/vnd.github+json','User-Agent':'diary-pdf-builder'})
@@ -90,5 +90,5 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add thoughts.html thoughts-and-quotes.pdf
+          git add en/thoughts.html thoughts-and-quotes.pdf
           git diff --cached --quiet || (git commit -m 'Update English diary PDF' && git push)
