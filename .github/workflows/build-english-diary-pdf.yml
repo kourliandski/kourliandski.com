@@ -91,4 +91,4 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add en/thoughts.html thoughts-and-quotes.pdf
-          git diff --cached --quiet || (git commit -m 'Update English diary PDF' && git push)
+          git diff --cached --quiet || (git commit -m 'Update English diary PDF' && git pull --rebase origin main && git push)
