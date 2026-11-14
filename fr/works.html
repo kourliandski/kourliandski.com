@@ -117,6 +117,7 @@ function searchableWorkText(d){
 function workSeries(d){
   const t=d.Title.trim();
   const out=[];
+  if(d['Series / family']) out.push(d['Series / family']);
   if(t.startsWith('Maps of non-existent cities.')) out.push('Maps of non-existent cities');
   if(/^Possible places(?:\b|\.)/i.test(t)) out.push('Possible places');
   if(/^Bagatelle\s+\d+/i.test(t) || /^3 bagatelles$/i.test(t)) out.push('Bagatelles');
