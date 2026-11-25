@@ -17,14 +17,6 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install reportlab
-      - name: Point diary to current PDF
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('en/thoughts.html'); s=p.read_text(encoding='utf-8')
-          s=s.replace('href="thoughts-and-quotes-2026-09-13-no-page-numbers.pdf" download="thoughts-and-quotes-2026-09-13.pdf"','href="thoughts-and-quotes.pdf" download="thoughts-and-quotes.pdf"')
-          p.write_text(s,encoding='utf-8')
-          PY
       - name: Build English PDF from diary
         run: |
           cat > /tmp/build_en_pdf.py <<'PY'
